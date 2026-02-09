@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +7,13 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root{--bg:#0a0a0a;--surface:#141414;--surface2:#1a1a1a;--border:#222;--border-light:#333;--text:#e8e8e8;--text-muted:#888;--text-dim:#555;--accent:#f5c542;--accent-dim:#f5c54222;--green:#34d399;--green-dim:#34d39918;--orange:#fb923c;--orange-dim:#fb923c18;--red:#f87171;--blue:#60a5fa;--blue-dim:#60a5fa18}
+        /* DARK THEME */
+        [data-theme="dark"]{--bg:#0a0a0a;--surface:#141414;--border:#222;--border-light:#333;--text:#e8e8e8;--text-muted:#888;--text-dim:#555;--accent:#f5c542;--accent-dim:#f5c54222;--green:#34d399;--green-dim:#34d39918;--orange:#fb923c;--orange-dim:#fb923c18;--red:#f87171;--blue:#60a5fa;--blue-dim:#60a5fa18;--header-bg:rgba(10,10,10,.9);--modal-bg:rgba(0,0,0,.65);--input-bg:transparent;--select-bg:#0a0a0a;--scheme:dark}
+        /* LIGHT THEME */
+        [data-theme="light"]{--bg:#f5f5f5;--surface:#ffffff;--border:#e0e0e0;--border-light:#ccc;--text:#1a1a1a;--text-muted:#666;--text-dim:#999;--accent:#c9960c;--accent-dim:#c9960c15;--green:#16a34a;--green-dim:#16a34a12;--orange:#ea580c;--orange-dim:#ea580c12;--red:#dc2626;--blue:#2563eb;--blue-dim:#2563eb12;--header-bg:rgba(245,245,245,.92);--modal-bg:rgba(0,0,0,.35);--input-bg:#fff;--select-bg:#fff;--scheme:light}
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-        .header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,10,10,.9);z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
+        .header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--header-bg);z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:background .2s}
         .header-left{display:flex;align-items:center;gap:14px}
         .logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
         .logo-divider{width:1px;height:18px;background:var(--border-light)}
@@ -20,25 +23,26 @@
         .user-badge.admin{background:var(--blue-dim);color:var(--blue);border-color:var(--blue)}
         .btn-s{font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s}
         .btn-s:hover{border-color:var(--border-light);color:var(--text)}
-        .lang-btn{font-family:'Space Mono',monospace;font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;letter-spacing:1px;transition:all .15s}
-        .lang-btn:hover{border-color:var(--accent);color:var(--accent)}
+        .lang-btn,.theme-btn{font-family:'Space Mono',monospace;font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;letter-spacing:1px;transition:all .15s}
+        .lang-btn:hover,.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
         .toolbar{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
         .tb-group{display:flex;gap:4px;align-items:center}
         .tb-btn{font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
         .tb-btn:hover{border-color:var(--border-light);color:var(--text)}
         .tb-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
         .tb-count{font-family:'Space Mono',monospace;font-size:10px;background:var(--border);padding:1px 5px;border-radius:3px}
-        .tb-btn.active .tb-count{background:var(--accent);color:var(--bg)}
+        .tb-btn.active .tb-count{background:var(--accent);color:#fff}
+        [data-theme="dark"] .tb-btn.active .tb-count{color:var(--bg)}
         .tb-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
-        .tb-search{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);outline:none;width:180px;transition:all .15s;margin-left:auto}
+        .tb-search{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);outline:none;width:180px;transition:all .15s;margin-left:auto}
         .tb-search::placeholder{color:var(--text-dim)}
         .tb-search:focus{border-color:var(--accent);width:240px}
-        .tb-date{font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);outline:none;color-scheme:dark}
+        .tb-date{font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);outline:none;color-scheme:var(--scheme)}
         .tb-date:focus{border-color:var(--accent)}
-        .tb-select{font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);outline:none;cursor:pointer;color-scheme:dark}
+        .tb-select{font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--select-bg);color:var(--text-muted);outline:none;cursor:pointer;color-scheme:var(--scheme)}
         .content{max-width:1100px;margin:0 auto;padding:20px 28px}
         .stats{display:flex;gap:12px;margin-bottom:20px}
-        .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1;display:flex;align-items:center;justify-content:space-between}
+        .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1;display:flex;align-items:center;justify-content:space-between;transition:background .2s}
         .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-dim);font-family:'Space Mono',monospace}
         .stat-val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace}
         .stat-val.p{color:var(--orange)}.stat-val.d{color:var(--green)}
@@ -60,39 +64,40 @@
         .row-by{font-size:9px;color:var(--text-dim);margin-top:2px;text-align:center}
         .row-open{font-size:16px;color:var(--text-dim);transition:color .15s}
         .order-row:hover .row-open{color:var(--accent)}
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s ease}
+        .modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s ease}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:560px;max-width:92vw;max-height:85vh;overflow:auto;animation:slideUp .2s ease}
+        .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:560px;max-width:92vw;max-height:85vh;overflow:auto;animation:slideUp .2s ease;transition:background .2s}
         @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
         .modal-head-left{display:flex;align-items:center;gap:12px}
         .modal-order-num{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent)}
         .modal-date{font-size:12px;color:var(--text-dim)}
         .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-        .modal-close:hover{border-color:var(--red);color:var(--red);background:#f8717111}
+        .modal-close:hover{border-color:var(--red);color:var(--red)}
         .modal-body{padding:20px 24px}
-        .modal-item{padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+        .modal-item{padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:background .2s}
         .modal-item:last-child{margin-bottom:0}
         .mi-icon{width:40px;height:40px;border-radius:9px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
         .mi-info{flex:1;min-width:0}
         .mi-title{font-weight:600;font-size:13px;margin-bottom:2px}
         .mi-variant{font-size:12px;color:var(--text-muted);margin-bottom:8px}
         .mi-props{display:flex;flex-wrap:wrap;gap:6px}
-        .mi-prop{font-size:11px;padding:4px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;gap:5px}
+        .mi-prop{font-size:11px;padding:4px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;gap:5px;transition:background .2s}
         .mi-prop-l{color:var(--text-dim)}.mi-prop-v{color:var(--text);font-weight:500}
         .mi-qty{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-muted);padding:4px 10px;background:var(--surface);border-radius:5px;flex-shrink:0}
         .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;position:sticky;bottom:0;background:var(--surface)}
-        .modal-notes{font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;flex:1}
+        .modal-notes{font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;flex:1;transition:background .2s}
         .modal-notes::placeholder{color:var(--text-dim)}
         .modal-notes:focus{border-color:var(--accent)}
         .modal-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:8px 20px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-        .modal-btn.done{background:var(--accent);color:var(--bg)}
+        .modal-btn.done{background:var(--accent);color:#fff}
+        [data-theme="dark"] .modal-btn.done{color:var(--bg)}
         .modal-btn.done:hover{filter:brightness(1.1)}
         .modal-btn.undone{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
         .modal-btn.undone:hover{border-color:var(--red);color:var(--red)}
-        .admin-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;padding:14px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+        .admin-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;padding:14px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;transition:background .2s}
         .admin-bar-title{font-size:12px;color:var(--blue);font-weight:600}
-        .admin-chip{font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px}
+        .admin-chip{font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px;transition:background .2s}
         .admin-chip-name{font-weight:600;color:var(--text)}
         .admin-chip-count{color:var(--text-muted);font-family:'Space Mono',monospace;font-size:10px}
         .admin-help{font-size:10px;color:var(--text-dim);margin-left:auto}
@@ -101,22 +106,23 @@
         .loading-spinner{width:28px;height:28px;border:2px solid var(--border);border-top:2px solid var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
         @keyframes spin{to{transform:rotate(360deg)}}
         .loading-text{font-size:12px;color:var(--text-dim)}
-        .login-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center}
+        .login-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;transition:background .2s}
         .login-modal{width:380px;max-width:90vw;text-align:center}
         .login-logo{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
         .login-sub{font-size:13px;color:var(--text-muted);margin-bottom:36px}
         .login-field{margin-bottom:14px;text-align:left}
         .login-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:6px;font-family:'Space Mono',monospace}
-        .login-field input{font-family:'DM Sans',sans-serif;font-size:14px;padding:12px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%}
+        .login-field input{font-family:'DM Sans',sans-serif;font-size:14px;padding:12px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%;transition:background .2s}
         .login-field input:focus{border-color:var(--accent)}
-        .login-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:12px 28px;border-radius:9px;border:none;background:var(--accent);color:var(--bg);cursor:pointer;width:100%;margin-top:6px}
+        .login-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:12px 28px;border-radius:9px;border:none;background:var(--accent);color:#fff;cursor:pointer;width:100%;margin-top:6px}
+        [data-theme="dark"] .login-btn{color:var(--bg)}
         .login-btn:hover{filter:brightness(1.1)}
         .login-btn:disabled{opacity:.5}
         .login-err{font-size:12px;color:var(--red);margin-top:10px;min-height:18px}
-        .login-lang{margin-top:20px}
+        .login-lang{margin-top:20px;display:flex;gap:8px;justify-content:center}
         .empty-state{text-align:center;padding:50px 32px;color:var(--text-dim)}
         .empty-state-icon{font-size:40px;margin-bottom:12px}
-        .error-banner{background:#f8717118;border:1px solid #f8717133;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red)}
+        .error-banner{background:var(--orange-dim);border:1px solid var(--orange);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red)}
         @media(max-width:768px){
             .header{padding:14px 18px}.toolbar{padding:10px 18px}.content{padding:16px 18px}.stats{flex-direction:column;gap:8px}
             .list-header{display:none}
@@ -133,7 +139,8 @@
 (()=>{
 const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Connected',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search order or design...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No unfulfilled orders',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',dsgn:'designed',orders:'orders',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Conectado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar pedido o diseño...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',dsgn:'diseñados',orders:'pedidos',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana'}};
 const LS={g:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}},s:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),d:k=>localStorage.removeItem(k),r:k=>localStorage.getItem(k),w:(k,v)=>localStorage.setItem(k,v)};
-const st={screen:'loading',orders:[],loading:false,error:null,filter:'all',search:'',designed:LS.g('dp_d',{}),notes:LS.g('dp_n',{}),token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:''};
+const st={screen:'loading',orders:[],loading:false,error:null,filter:'all',search:'',designed:LS.g('dp_d',{}),notes:LS.g('dp_n',{}),token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:''};
+document.documentElement.setAttribute('data-theme',st.theme);
 const t=k=>T[st.lang][k]||k;
 const fmtD=iso=>new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short'});
 const fmtDT=iso=>new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
@@ -145,20 +152,25 @@ function dS(){const s={};Object.values(st.designed).forEach(d=>{if(d?.by)s[d.by]
 async function aL(pw){const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});if(!r.ok)throw new Error;return r.json()}
 async function aO(tk){const r=await fetch('/api/orders',{headers:{'X-Auth-Token':tk}});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
 function tD(id,e){if(e){e.stopPropagation();e.preventDefault()}if(st.designed[id])delete st.designed[id];else st.designed[id]={at:new Date().toISOString(),by:st.user?.name||'?'};LS.s('dp_d',st.designed);render()}
+function toggleTheme(){st.theme=st.theme==='dark'?'light':'dark';LS.w('dp_th',st.theme);document.documentElement.setAttribute('data-theme',st.theme);render()}
 
 function render(){
 const app=document.getElementById('app');document.documentElement.lang=st.lang;
+const themeIcon=st.theme==='dark'?'☀️':'🌙';
 if(st.screen==='loading'){app.innerHTML=`<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('connecting')}</div></div>`;return}
 if(st.screen==='login'){
-  app.innerHTML=`<div class="login-overlay"><div class="login-modal"><div class="login-logo">⬡ Studio</div><div class="login-sub">${t('portal')}</div><div class="login-field"><label>${t('password')}</label><input type="password" id="lp" placeholder="${t('password')}" autofocus></div><button class="login-btn" id="lb">${t('login')}</button><div class="login-err">${st.loginError}</div><div class="login-lang"><button class="lang-btn" id="ll">${st.lang==='es'?'EN':'ES'}</button></div></div></div>`;
+  app.innerHTML=`<div class="login-overlay"><div class="login-modal"><div class="login-logo">⬡ Studio</div><div class="login-sub">${t('portal')}</div><div class="login-field"><label>${t('password')}</label><input type="password" id="lp" placeholder="${t('password')}" autofocus></div><button class="login-btn" id="lb">${t('login')}</button><div class="login-err">${st.loginError}</div><div class="login-lang"><button class="lang-btn" id="ll">${st.lang==='es'?'EN':'ES'}</button><button class="theme-btn" id="lth">${themeIcon}</button></div></div></div>`;
   const lb=document.getElementById('lb'),lp=document.getElementById('lp');
   async function go(){if(!lp.value.trim())return;lb.disabled=true;lb.textContent='...';try{const d=await aL(lp.value.trim());LS.w('dp_t',d.token);LS.s('dp_u',{name:d.name,role:d.role});st.token=d.token;st.user={name:d.name,role:d.role};st.loginError='';st.screen='dashboard';render();load()}catch{st.loginError=t('loginError');render()}}
-  lb.onclick=go;lp.onkeydown=e=>{if(e.key==='Enter')go()};document.getElementById('ll').onclick=()=>{st.lang=st.lang==='es'?'en':'es';LS.w('dp_l',st.lang);render()};return}
+  lb.onclick=go;lp.onkeydown=e=>{if(e.key==='Enter')go()};
+  document.getElementById('ll').onclick=()=>{st.lang=st.lang==='es'?'en':'es';LS.w('dp_l',st.lang);render()};
+  document.getElementById('lth').onclick=toggleTheme;
+  return}
 
 const f=gF(),pc=st.orders.filter(o=>!st.designed[o.id]).length,dc=st.orders.filter(o=>st.designed[o.id]).length,isA=st.user?.role==='admin';
 const td=new Date().toISOString().slice(0,10),wa=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
 app.innerHTML=`
-<div class="header"><div class="header-left"><div class="logo">⬡ Studio</div><div class="logo-divider"></div><div class="header-subtitle">${t('portal')}</div></div><div class="header-right"><span class="user-badge ${isA?'admin':''}">${st.user?.name||''}</span><button class="lang-btn" id="lt">${st.lang==='es'?'EN':'ES'}</button><button class="btn-s" id="lo">${t('logout')}</button></div></div>
+<div class="header"><div class="header-left"><div class="logo">⬡ Studio</div><div class="logo-divider"></div><div class="header-subtitle">${t('portal')}</div></div><div class="header-right"><span class="user-badge ${isA?'admin':''}">${st.user?.name||''}</span><button class="theme-btn" id="thm">${themeIcon}</button><button class="lang-btn" id="lt">${st.lang==='es'?'EN':'ES'}</button><button class="btn-s" id="lo">${t('logout')}</button></div></div>
 <div class="toolbar">
   <div class="tb-group"><button class="tb-btn ${st.filter==='all'?'active':''}" data-f="all">${t('all')} <span class="tb-count">${st.orders.length}</span></button><button class="tb-btn ${st.filter==='pending'?'active':''}" data-f="pending">${t('pendingF')} <span class="tb-count">${pc}</span></button><button class="tb-btn ${st.filter==='designed'?'active':''}" data-f="designed">${t('designedF')} <span class="tb-count">${dc}</span></button></div>
   <div class="tb-sep"></div>
@@ -170,18 +182,18 @@ app.innerHTML=`
 </div>
 <div class="content">
   ${st.error?`<div class="error-banner">⚠️ ${st.error}</div>`:''}
-  ${isA?rAdmin():''}
+  ${isA?rA():''}
   <div class="stats"><div class="stat"><span class="stat-label">${t('pendingL')}</span><span class="stat-val p">${pc}</span></div><div class="stat"><span class="stat-label">${t('designedL')}</span><span class="stat-val d">${dc}</span></div><div class="stat"><span class="stat-label">${t('totalS')}</span><span class="stat-val">${st.orders.reduce((s,o)=>s+o.line_items.reduce((ss,i)=>ss+i.quantity,0),0)}</span></div></div>
   ${st.loading?`<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('loading')}</div></div>`:''}
   ${!st.loading&&f.length===0?`<div class="empty-state"><div class="empty-state-icon">${st.filter==='pending'?'🎉':'📭'}</div><p>${{all:t('eAll'),pending:t('ePending'),designed:t('eDesigned')}[st.filter]}</p></div>`:''}
-  ${!st.loading&&f.length>0?`<div class="list-header"><span></span><span>${t('orderN')}</span><span>${t('date')}</span><span>${t('items')}</span><span>${t('status')}</span><span></span></div>${f.map(rRow).join('')}`:''}
+  ${!st.loading&&f.length>0?`<div class="list-header"><span></span><span>${t('orderN')}</span><span>${t('date')}</span><span>${t('items')}</span><span>${t('status')}</span><span></span></div>${f.map(rR).join('')}`:''}
 </div>
-${st.modal?rModal():''}`;
+${st.modal?rM():''}`;
 bind(td,wa)}
 
-function rRow(o){const d=st.designed[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o);return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
-function rModal(){const o=st.modal;if(!o)return'';const d=st.designed[o.id],dn=!!d,n=st.notes[o.id]||'';return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span></div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${(n||'').replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb">${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
-function rAdmin(){const s=dS();return`<div class="admin-bar"><span class="admin-bar-title">${t('admin')}</span>${Object.entries(s).map(([n,c])=>`<span class="admin-chip"><span class="admin-chip-name">${n}</span><span class="admin-chip-count">${c}</span></span>`).join('')}<span class="admin-help">${t('adminInfo')} <code>DESIGNER_USERS</code></span></div>`}
+function rR(o){const d=st.designed[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o);return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
+function rM(){const o=st.modal;if(!o)return'';const d=st.designed[o.id],dn=!!d,n=st.notes[o.id]||'';return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span></div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${(n||'').replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb">${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
+function rA(){const s=dS();return`<div class="admin-bar"><span class="admin-bar-title">${t('admin')}</span>${Object.entries(s).map(([n,c])=>`<span class="admin-chip"><span class="admin-chip-name">${n}</span><span class="admin-chip-count">${c}</span></span>`).join('')}<span class="admin-help">${t('adminInfo')} <code>DESIGNER_USERS</code></span></div>`}
 
 function bind(td,wa){
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{st.filter=b.dataset.f;render()});
@@ -195,6 +207,7 @@ function bind(td,wa){
   document.getElementById('rf').onclick=load;
   document.getElementById('lo').onclick=()=>{LS.d('dp_t');LS.d('dp_u');st.token=null;st.user=null;st.orders=[];st.screen='login';render()};
   document.getElementById('lt').onclick=()=>{st.lang=st.lang==='es'?'en':'es';LS.w('dp_l',st.lang);render()};
+  document.getElementById('thm')?.addEventListener('click',toggleTheme);
   document.querySelectorAll('[data-chk]').forEach(el=>el.onclick=e=>tD(el.dataset.chk,e));
   document.querySelectorAll('[data-oid]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-chk]'))return;st.modal=st.orders.find(o=>String(o.id)===el.dataset.oid);render()});
   document.getElementById('mo')?.addEventListener('click',e=>{if(e.target.id==='mo'){st.modal=null;render()}});
