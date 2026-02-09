@@ -52,6 +52,7 @@
         .row-check{width:28px;height:28px;border-radius:7px;border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:14px;flex-shrink:0}
         .row-check:hover{border-color:var(--accent);background:var(--accent-dim)}
         .row-check.checked{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+        .row-check.saving{opacity:.5;pointer-events:none}
         .row-order{font-family:'Space Mono',monospace;font-weight:700;color:var(--accent);font-size:13px}
         .row-items{color:var(--text-muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
         .row-date{color:var(--text-dim);font-size:12px;font-weight:400}
@@ -93,6 +94,7 @@
         .modal-btn.done:hover{filter:brightness(1.1)}
         .modal-btn.undone{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
         .modal-btn.undone:hover{border-color:var(--red);color:var(--red)}
+        .modal-btn:disabled{opacity:.5;pointer-events:none}
         .admin-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;padding:14px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;transition:background .2s}
         .admin-bar-title{font-size:12px;color:var(--blue);font-weight:600}
         .admin-chip{font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px;transition:background .2s}
@@ -110,35 +112,29 @@
         .login-sub{font-size:13px;color:var(--text-muted);margin-bottom:36px;font-weight:400}
         .login-field{margin-bottom:14px;text-align:left}
         .login-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:6px;font-family:'Space Mono',monospace}
-        .login-field input{font-family:'Poppins',sans-serif;font-size:14px;padding:12px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%;transition:background .2s;font-weight:400}
+        .login-field input{font-family:'Poppins',sans-serif;font-size:14px;padding:12px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%;font-weight:400}
         .login-field input:focus{border-color:var(--accent)}
         .login-btn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;padding:12px 28px;border-radius:9px;border:none;background:var(--accent);color:#fff;cursor:pointer;width:100%;margin-top:6px}
         [data-theme="dark"] .login-btn{color:var(--bg)}
-        .login-btn:hover{filter:brightness(1.1)}
-        .login-btn:disabled{opacity:.5}
+        .login-btn:hover{filter:brightness(1.1)}.login-btn:disabled{opacity:.5}
         .login-err{font-size:12px;color:var(--red);margin-top:10px;min-height:18px;font-weight:400}
         .login-lang{margin-top:20px;display:flex;gap:8px;justify-content:center}
         .empty-state{text-align:center;padding:50px 32px;color:var(--text-dim)}
         .empty-state-icon{font-size:40px;margin-bottom:12px}
-        .empty-state p{font-weight:400}
         .error-banner{background:var(--orange-dim);border:1px solid var(--orange);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red);font-weight:400}
-        @media(max-width:768px){
-            .header{padding:14px 18px}.toolbar{padding:10px 18px}.content{padding:16px 18px}.stats{flex-direction:column;gap:8px}
-            .list-header{display:none}
-            .order-row{grid-template-columns:32px 1fr auto auto;gap:8px;padding:10px 12px}
-            .row-date,.row-count{display:none}
-            .tb-search{width:100%;margin-left:0}.tb-search:focus{width:100%}
-            .header-subtitle,.logo-divider{display:none}.modal{border-radius:12px;margin:8px}.admin-help{display:none}
-        }
+        .sync-indicator{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px}
+        .sync-indicator.syncing{color:var(--orange)}
+        .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+        @media(max-width:768px){.header{padding:14px 18px}.toolbar{padding:10px 18px}.content{padding:16px 18px}.stats{flex-direction:column;gap:8px}.list-header{display:none}.order-row{grid-template-columns:32px 1fr auto auto;gap:8px;padding:10px 12px}.row-date,.row-count{display:none}.tb-search{width:100%;margin-left:0}.tb-search:focus{width:100%}.header-subtitle,.logo-divider{display:none}.modal{border-radius:12px;margin:8px}.admin-help{display:none}}
     </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 (()=>{
-const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Connected',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search order or design...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No unfulfilled orders',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',dsgn:'designed',orders:'orders',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Conectado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar pedido o diseño...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',dsgn:'diseñados',orders:'pedidos',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana'}};
+const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Synced',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search order or design...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No unfulfilled orders',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week',syncing:'Syncing...'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Sincronizado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar pedido o diseño...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana',syncing:'Sincronizando...'}};
 const LS={g:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}},s:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),d:k=>localStorage.removeItem(k),r:k=>localStorage.getItem(k),w:(k,v)=>localStorage.setItem(k,v)};
-const st={screen:'loading',orders:[],loading:false,error:null,filter:'all',search:'',designed:LS.g('dp_d',{}),notes:LS.g('dp_n',{}),token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:''};
+const st={screen:'loading',orders:[],loading:false,error:null,filter:'all',search:'',designed:{},notes:{},token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:'',saving:{}};
 document.documentElement.setAttribute('data-theme',st.theme);
 const t=k=>T[st.lang][k]||k;
 const fmtD=iso=>new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short'});
@@ -148,14 +144,23 @@ const gI=i=>{const p=(i.properties||[]).find(p=>['Tipo','tipo','Type','type'].in
 const iSum=o=>o.line_items.map(i=>{const d=(i.properties||[]).find(p=>['Diseño','diseño','Design','design'].includes(p.name));return d?d.value:i.variant_title||''}).filter(Boolean).join(', ');
 function gF(){let o=[...st.orders];if(st.filter==='pending')o=o.filter(x=>!st.designed[x.id]);else if(st.filter==='designed')o=o.filter(x=>st.designed[x.id]);if(st.dateFrom){const d=new Date(st.dateFrom);d.setHours(0,0,0,0);o=o.filter(x=>new Date(x.created_at)>=d)}if(st.dateTo){const d=new Date(st.dateTo);d.setHours(23,59,59,999);o=o.filter(x=>new Date(x.created_at)<=d)}if(st.search.trim()){const q=st.search.toLowerCase();o=o.filter(x=>x.name.toLowerCase().includes(q)||x.line_items.some(i=>(i.title||'').toLowerCase().includes(q)||(i.variant_title||'').toLowerCase().includes(q)||(i.properties||[]).some(p=>(p.value||'').toLowerCase().includes(q))))}o.sort((a,b)=>st.sort==='oldest'?new Date(a.created_at)-new Date(b.created_at):new Date(b.created_at)-new Date(a.created_at));return o}
 function dS(){const s={};Object.values(st.designed).forEach(d=>{if(d?.by)s[d.by]=(s[d.by]||0)+1});return s}
+
+// API calls
+const hdrs=()=>({'Content-Type':'application/json','X-Auth-Token':st.token});
 async function aL(pw){const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});if(!r.ok)throw new Error;return r.json()}
-async function aO(tk){const r=await fetch('/api/orders',{headers:{'X-Auth-Token':tk}});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
-function tD(id,e){if(e){e.stopPropagation();e.preventDefault()}if(st.designed[id])delete st.designed[id];else st.designed[id]={at:new Date().toISOString(),by:st.user?.name||'?'};LS.s('dp_d',st.designed);render()}
+async function aO(){const r=await fetch('/api/orders',{headers:hdrs()});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
+async function fetchStatus(){try{const r=await fetch('/api/status',{headers:hdrs()});if(r.ok){const d=await r.json();st.designed=d.designed||{};st.notes=d.notes||{}}}catch(e){console.error('Status fetch error:',e)}}
+async function apiMark(orderId){st.saving[orderId]=true;render();try{const r=await fetch('/api/status',{method:'POST',headers:hdrs(),body:JSON.stringify({action:'mark',orderId:String(orderId)})});if(r.ok){const d=await r.json();st.designed=d.designed||st.designed}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
+async function apiUnmark(orderId){st.saving[orderId]=true;render();try{const r=await fetch('/api/status',{method:'POST',headers:hdrs(),body:JSON.stringify({action:'unmark',orderId:String(orderId)})});if(r.ok){const d=await r.json();st.designed=d.designed||st.designed}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
+async function apiNote(orderId,note){try{await fetch('/api/status',{method:'POST',headers:hdrs(),body:JSON.stringify({action:'note',orderId:String(orderId),note})})}catch(e){console.error(e)}}
+
+function tD(id,e){if(e){e.stopPropagation();e.preventDefault()}if(st.saving[id])return;st.designed[id]?apiUnmark(id):apiMark(id)}
 function toggleTheme(){st.theme=st.theme==='dark'?'light':'dark';LS.w('dp_th',st.theme);document.documentElement.setAttribute('data-theme',st.theme);render()}
 
 function render(){
 const app=document.getElementById('app');document.documentElement.lang=st.lang;
 const thI=st.theme==='dark'?'☀️':'🌙';
+const isSyncing=Object.values(st.saving).some(v=>v);
 if(st.screen==='loading'){app.innerHTML=`<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('connecting')}</div></div>`;return}
 if(st.screen==='login'){
   app.innerHTML=`<div class="login-overlay"><div class="login-modal"><div class="login-logo">⬡ Studio</div><div class="login-sub">${t('portal')}</div><div class="login-field"><label>${t('password')}</label><input type="password" id="lp" placeholder="${t('password')}" autofocus></div><button class="login-btn" id="lb">${t('login')}</button><div class="login-err">${st.loginError}</div><div class="login-lang"><button class="lang-btn" id="ll">${st.lang==='es'?'EN':'ES'}</button><button class="theme-btn" id="lth">${thI}</button></div></div></div>`;
@@ -168,7 +173,7 @@ if(st.screen==='login'){
 const f=gF(),pc=st.orders.filter(o=>!st.designed[o.id]).length,dc=st.orders.filter(o=>st.designed[o.id]).length,isA=st.user?.role==='admin';
 const td=new Date().toISOString().slice(0,10),wa=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
 app.innerHTML=`
-<div class="header"><div class="header-left"><div class="logo">⬡ Studio</div><div class="logo-divider"></div><div class="header-subtitle">${t('portal')}</div></div><div class="header-right"><span class="user-badge ${isA?'admin':''}">${st.user?.name||''}</span><button class="theme-btn" id="thm">${thI}</button><button class="lang-btn" id="lt">${st.lang==='es'?'EN':'ES'}</button><button class="btn-s" id="lo">${t('logout')}</button></div></div>
+<div class="header"><div class="header-left"><div class="logo">⬡ Studio</div><div class="logo-divider"></div><div class="header-subtitle">${t('portal')}</div></div><div class="header-right"><div class="sync-indicator ${isSyncing?'syncing':''}"><div class="sync-dot"></div>${isSyncing?t('syncing'):t('connected')}</div><span class="user-badge ${isA?'admin':''}">${st.user?.name||''}</span><button class="theme-btn" id="thm">${thI}</button><button class="lang-btn" id="lt">${st.lang==='es'?'EN':'ES'}</button><button class="btn-s" id="lo">${t('logout')}</button></div></div>
 <div class="toolbar">
   <div class="tb-group"><button class="tb-btn ${st.filter==='all'?'active':''}" data-f="all">${t('all')} <span class="tb-count">${st.orders.length}</span></button><button class="tb-btn ${st.filter==='pending'?'active':''}" data-f="pending">${t('pendingF')} <span class="tb-count">${pc}</span></button><button class="tb-btn ${st.filter==='designed'?'active':''}" data-f="designed">${t('designedF')} <span class="tb-count">${dc}</span></button></div>
   <div class="tb-sep"></div>
@@ -189,8 +194,8 @@ app.innerHTML=`
 ${st.modal?rM():''}`;
 bind(td,wa)}
 
-function rR(o){const d=st.designed[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o);return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
-function rM(){const o=st.modal;if(!o)return'';const d=st.designed[o.id],dn=!!d,n=st.notes[o.id]||'';return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span></div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${(n||'').replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb">${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
+function rR(o){const d=st.designed[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o),sv=st.saving[o.id];return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''} ${sv?'saving':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
+function rM(){const o=st.modal;if(!o)return'';const d=st.designed[o.id],dn=!!d,n=st.notes[o.id],nt=n?n.text||'':'',sv=st.saving[o.id];return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span></div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${nt.replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb" ${sv?'disabled':''}>${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
 function rA(){const s=dS();return`<div class="admin-bar"><span class="admin-bar-title">${t('admin')}</span>${Object.entries(s).map(([n,c])=>`<span class="admin-chip"><span class="admin-chip-name">${n}</span><span class="admin-chip-count">${c}</span></span>`).join('')}<span class="admin-help">${t('adminInfo')} <code>DESIGNER_USERS</code></span></div>`}
 
 function bind(td,wa){
@@ -211,12 +216,28 @@ function bind(td,wa){
   document.getElementById('mo')?.addEventListener('click',e=>{if(e.target.id==='mo'){st.modal=null;render()}});
   document.getElementById('mc')?.addEventListener('click',()=>{st.modal=null;render()});
   document.getElementById('mb')?.addEventListener('click',()=>{if(st.modal)tD(st.modal.id)});
-  const mn=document.getElementById('mn');if(mn){let to;mn.oninput=()=>{clearTimeout(to);to=setTimeout(()=>{if(st.modal){st.notes[st.modal.id]=mn.value;LS.s('dp_n',st.notes)}},300)}}
+  const mn=document.getElementById('mn');if(mn){let to;mn.oninput=()=>{clearTimeout(to);to=setTimeout(()=>{if(st.modal)apiNote(st.modal.id,mn.value)},800)}}
   document.onkeydown=e=>{if(e.key==='Escape'&&st.modal){st.modal=null;render()}};
 }
 
-async function load(){st.loading=true;st.error=null;render();try{st.orders=await aO(st.token);st.loading=false}catch(e){if(e.message==='UNAUTHORIZED'){st.screen='login';st.loginError=t('sessionExpired')}else st.error=e.message;st.loading=false}render()}
-setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading)load()},60000);
+async function load(){
+  st.loading=true;st.error=null;render();
+  try{
+    const [orders]=await Promise.all([aO(),fetchStatus()]);
+    st.orders=orders;st.loading=false;
+  }catch(e){
+    if(e.message==='UNAUTHORIZED'){st.screen='login';st.loginError=t('sessionExpired')}
+    else st.error=e.message;
+    st.loading=false;
+  }
+  render();
+}
+
+// Auto-refresh every 30s (more frequent since shared)
+setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading){fetchStatus().then(render)}},30000);
+// Full reload every 2 min
+setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading)load()},120000);
+
 if(st.token&&st.user){st.screen='dashboard';render();load()}else{st.screen='login';render()}
 })();
 </script>
