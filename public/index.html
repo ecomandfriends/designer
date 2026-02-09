@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designer Portal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#0a0a0a;--surface:#141414;--border:#222;--border-light:#333;--text:#e8e8e8;--text-muted:#888;--text-dim:#555;--accent:#f5c542;--accent-dim:#f5c54233;--green:#34d399;--green-dim:#34d39922;--orange:#fb923c;--orange-dim:#fb923c22;--red:#f87171;--blue:#60a5fa;--blue-dim:#60a5fa22}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .header{border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,10,10,.85);z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+        .header-left{display:flex;align-items:center;gap:16px}
+        .logo{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+        .logo-divider{width:1px;height:20px;background:var(--border-light)}
+        .header-subtitle{font-size:13px;color:var(--text-muted)}
+        .header-right{display:flex;align-items:center;gap:12px}
+        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+        .status-dot.error{background:var(--red)}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+        .connection-status{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+        .user-badge{font-size:11px;padding:4px 10px;border-radius:6px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);font-weight:600}
+        .user-badge.admin{background:var(--blue-dim);color:var(--blue);border-color:var(--blue)}
+        .btn-small{font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s}
+        .btn-small:hover{border-color:var(--border-light);color:var(--text)}
+        .lang-toggle{font-family:'Space Mono',monospace;font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s;letter-spacing:1px}
+        .lang-toggle:hover{border-color:var(--accent);color:var(--accent)}
+        .filters-bar{padding:16px 32px;display:flex;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+        .filter-btn{font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+        .filter-btn:hover{border-color:var(--border-light);color:var(--text)}
+        .filter-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+        .filter-count{font-family:'Space Mono',monospace;font-size:11px;background:var(--border);padding:2px 6px;border-radius:4px}
+        .filter-btn.active .filter-count{background:var(--accent);color:var(--bg)}
+        .search-input{font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);outline:none;margin-left:auto;width:220px;transition:all .2s}
+        .search-input::placeholder{color:var(--text-dim)}
+        .search-input:focus{border-color:var(--accent);width:280px}
+        .btn-refresh{font-size:16px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s}
+        .btn-refresh:hover{border-color:var(--accent);color:var(--accent)}
+        .main{max-width:900px;margin:0 auto;padding:24px 32px}
+        .summary-bar{display:flex;gap:16px;margin-bottom:32px}
+        .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;flex:1}
+        .summary-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:8px;font-family:'Space Mono',monospace}
+        .summary-value{font-size:28px;font-weight:700;font-family:'Space Mono',monospace}
+        .summary-value.pending{color:var(--orange)}
+        .summary-value.done{color:var(--green)}
+        .order-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden;transition:all .25s ease}
+        .order-card:hover{border-color:var(--border-light);transform:translateY(-1px)}
+        .order-card.designed{opacity:.5}
+        .order-card.designed:hover{opacity:.8}
+        .order-header{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+        .order-header-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+        .order-number{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent)}
+        .order-date{font-size:12px;color:var(--text-dim)}
+        .order-item-count{font-size:12px;color:var(--text-muted);background:var(--border);padding:4px 10px;border-radius:6px}
+        .order-status{display:flex;align-items:center;gap:8px}
+        .status-badge{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:6px}
+        .status-badge.pending{background:var(--orange-dim);color:var(--orange);border:1px solid #fb923c44}
+        .status-badge.done{background:var(--green-dim);color:var(--green);border:1px solid #34d39944}
+        .expand-icon{color:var(--text-dim);transition:transform .3s ease;font-size:18px}
+        .order-card.expanded .expand-icon{transform:rotate(180deg)}
+        .designed-by{font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right}
+        .order-items{display:none;border-top:1px solid var(--border)}
+        .order-card.expanded .order-items{display:block;animation:slideDown .2s ease}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .order-item{padding:20px 24px;display:flex;align-items:flex-start;gap:20px;border-bottom:1px solid var(--border)}
+        .order-item:last-child{border-bottom:none}
+        .item-icon{width:44px;height:44px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .item-details{flex:1}
+        .item-name{font-weight:600;font-size:14px;margin-bottom:4px}
+        .item-variant{font-size:13px;color:var(--text-muted);margin-bottom:10px}
+        .item-properties{display:flex;flex-wrap:wrap;gap:8px}
+        .item-prop{font-size:12px;padding:5px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;gap:6px}
+        .prop-label{color:var(--text-dim)}
+        .prop-value{color:var(--text);font-weight:500}
+        .item-qty{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-muted);background:var(--bg);padding:6px 12px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+        .order-actions{padding:16px 24px;border-top:1px solid var(--border);display:none;justify-content:space-between;align-items:center;gap:12px}
+        .order-card.expanded .order-actions{display:flex}
+        .btn-design{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+        .btn-design.mark-done{background:var(--accent);color:var(--bg)}
+        .btn-design.mark-done:hover{filter:brightness(1.1);transform:scale(1.02)}
+        .btn-design.mark-undone{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
+        .btn-design.mark-undone:hover{border-color:var(--red);color:var(--red)}
+        .order-notes-input{font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;flex:1;min-width:0}
+        .order-notes-input::placeholder{color:var(--text-dim)}
+        .order-notes-input:focus{border-color:var(--accent)}
+        .loading-state{text-align:center;padding:80px 32px}
+        .loading-spinner{width:32px;height:32px;border:2px solid var(--border);border-top:2px solid var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-text{font-size:13px;color:var(--text-dim)}
+        .login-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center}
+        .login-modal{width:400px;max-width:90vw;text-align:center}
+        .login-logo{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+        .login-subtitle{font-size:14px;color:var(--text-muted);margin-bottom:40px}
+        .login-field{margin-bottom:16px;text-align:left}
+        .login-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:8px;font-family:'Space Mono',monospace}
+        .login-field input{font-family:'DM Sans',sans-serif;font-size:14px;padding:14px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%;transition:all .2s}
+        .login-field input:focus{border-color:var(--accent)}
+        .login-submit{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:14px 32px;border-radius:10px;border:none;background:var(--accent);color:var(--bg);cursor:pointer;width:100%;margin-top:8px;transition:all .2s}
+        .login-submit:hover{filter:brightness(1.1)}
+        .login-submit:disabled{opacity:.5;cursor:not-allowed}
+        .login-error{font-size:13px;color:var(--red);margin-top:12px;min-height:20px}
+        .login-lang{margin-top:24px}
+        .empty-state{text-align:center;padding:60px 32px;color:var(--text-dim)}
+        .empty-state-icon{font-size:48px;margin-bottom:16px}
+        .empty-state p{font-size:14px;line-height:1.6}
+        .error-banner{background:#f8717122;border:1px solid #f8717144;border-radius:10px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:var(--red);display:flex;align-items:center;gap:10px}
+        .admin-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:24px;overflow:hidden}
+        .admin-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+        .admin-header h3{font-size:14px;color:var(--blue);display:flex;align-items:center;gap:8px}
+        .admin-body{padding:20px 24px;display:none}
+        .admin-panel.open .admin-body{display:block}
+        .admin-user-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+        .admin-user-row:last-child{border-bottom:none}
+        .admin-user-name{font-weight:600;font-size:14px;flex:1}
+        .admin-user-stats{font-size:12px;color:var(--text-muted)}
+        .admin-info{font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+        .admin-info code{background:var(--border);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--accent)}
+        @media(max-width:640px){
+            .header{padding:16px 20px}.filters-bar{padding:12px 20px}.main{padding:16px 20px}.summary-bar{flex-direction:column;gap:12px}.search-input{width:100%!important;margin-left:0}.order-header{padding:16px}.order-item{padding:16px;flex-wrap:wrap}.order-actions{flex-direction:column}.header-subtitle,.logo-divider{display:none}
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(() => {
+const T = {
+  en: {
+    portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',
+    sessionExpired:'Session expired. Please log in again.',connected:'Connected',logout:'Log out',
+    all:'All',pendingFilter:'Pending',designedFilter:'Designed',searchPlaceholder:'Search order or design...',
+    pendingLabel:'Pending',designedLabel:'Designed',totalStickers:'Total Stickers',
+    sticker:'sticker',stickers:'stickers',statusPending:'● Pending',statusDone:'✓ Designed',
+    markDone:'✓ Mark as designed',markUndone:'Unmark',notesPlaceholder:'Designer notes...',
+    loading:'Loading orders...',connecting:'Connecting...',
+    emptyAll:'No unfulfilled orders',emptyPending:'No pending orders 🎉',emptyDesigned:'No orders marked as designed yet',
+    designedBy:'by',adminPanel:'⚙ Admin — Designers',
+    adminInfo:'To add designers, go to Vercel → Settings → Environment Variables and edit',
+    adminDesigned:'designed',adminOrders:'orders'
+  },
+  es: {
+    portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',
+    sessionExpired:'Sesión expirada. Vuelve a entrar.',connected:'Conectado',logout:'Cerrar sesión',
+    all:'Todos',pendingFilter:'Pendientes',designedFilter:'Diseñados',searchPlaceholder:'Buscar pedido o diseño...',
+    pendingLabel:'Pendientes',designedLabel:'Diseñados',totalStickers:'Total Stickers',
+    sticker:'sticker',stickers:'stickers',statusPending:'● Pendiente',statusDone:'✓ Diseñado',
+    markDone:'✓ Marcar como diseñado',markUndone:'Desmarcar',notesPlaceholder:'Notas del diseñador...',
+    loading:'Cargando pedidos...',connecting:'Conectando...',
+    emptyAll:'No hay pedidos sin preparar',emptyPending:'No hay pedidos pendientes 🎉',emptyDesigned:'Aún no has marcado ningún pedido',
+    designedBy:'por',adminPanel:'⚙ Admin — Diseñadores',
+    adminInfo:'Para añadir diseñadores, ve a Vercel → Settings → Environment Variables y edita',
+    adminDesigned:'diseñados',adminOrders:'pedidos'
+  }
+};
+
+const S = {
+  get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}},
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
+  del:(k)=>localStorage.removeItem(k),
+  raw:(k)=>localStorage.getItem(k),
+  rawSet:(k,v)=>localStorage.setItem(k,v)
+};
+
+const st = {
+  screen:'loading', orders:[], loading:false, error:null,
+  filter:'all', search:'', expanded:{},
+  designed: S.get('dp_designed',{}),
+  notes: S.get('dp_notes',{}),
+  token: S.raw('dp_token'),
+  user: S.get('dp_user',null),
+  lang: S.raw('dp_lang') || (navigator.language.startsWith('es')?'es':'en'),
+  loginError:'', adminOpen:false
+};
+
+function t(k){return T[st.lang][k]||k}
+
+function formatDate(iso){
+  return new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+
+const ICONS={Text:'✏️',Flag:'🏳️',Emoji:'😀',Number:'🔢',Image:'🖼️',Icon:'⭐',Logo:'🎨'};
+function getIcon(item){
+  const p=(item.properties||[]).find(p=>['Tipo','tipo','Type','type'].includes(p.name));
+  return p?(ICONS[p.value]||'📦'):'📦';
+}
+
+function filtered(){
+  let o=[...st.orders];
+  if(st.filter==='pending')o=o.filter(x=>!st.designed[x.id]);
+  else if(st.filter==='designed')o=o.filter(x=>st.designed[x.id]);
+  if(st.search.trim()){
+    const q=st.search.toLowerCase();
+    o=o.filter(x=>{
+      if(x.name.toLowerCase().includes(q))return true;
+      return x.line_items.some(i=>(i.title||'').toLowerCase().includes(q)||(i.variant_title||'').toLowerCase().includes(q)||(i.properties||[]).some(p=>(p.value||'').toLowerCase().includes(q)));
+    });
+  }
+  return o;
+}
+
+function designerStats(){
+  const s={};
+  Object.values(st.designed).forEach(d=>{if(d&&d.by)s[d.by]=(s[d.by]||0)+1});
+  return s;
+}
+
+// API
+async function apiLogin(pw){
+  const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+  if(!r.ok)throw new Error('bad');
+  return r.json();
+}
+async function apiOrders(token){
+  const r=await fetch('/api/orders',{headers:{'X-Auth-Token':token}});
+  if(r.status===401){S.del('dp_token');S.del('dp_user');throw new Error('UNAUTHORIZED');}
+  if(!r.ok)throw new Error('Error loading orders');
+  return (await r.json()).orders||[];
+}
+
+// RENDER
+function render(){
+  const app=document.getElementById('app');
+  document.documentElement.lang=st.lang;
+
+  if(st.screen==='loading'){
+    app.innerHTML=`<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('connecting')}</div></div>`;
+    return;
+  }
+  if(st.screen==='login'){
+    app.innerHTML=`
+      <div class="login-overlay"><div class="login-modal">
+        <div class="login-logo">⬡ Studio</div>
+        <div class="login-subtitle">${t('portal')}</div>
+        <div class="login-field"><label>${t('password')}</label><input type="password" id="lp" placeholder="${t('password')}" autofocus></div>
+        <button class="login-submit" id="lb">${t('login')}</button>
+        <div class="login-error">${st.loginError}</div>
+        <div class="login-lang"><button class="lang-toggle" id="ll">${st.lang==='es'?'EN':'ES'}</button></div>
+      </div></div>`;
+    const lb=document.getElementById('lb'),lp=document.getElementById('lp');
+    async function doLogin(){
+      if(!lp.value.trim())return;
+      lb.disabled=true;lb.textContent='...';
+      try{
+        const d=await apiLogin(lp.value.trim());
+        S.rawSet('dp_token',d.token);S.set('dp_user',{name:d.name,role:d.role});
+        st.token=d.token;st.user={name:d.name,role:d.role};st.loginError='';st.screen='dashboard';
+        render();loadOrders();
+      }catch{st.loginError=t('loginError');render();}
+    }
+    lb.onclick=doLogin;
+    lp.onkeydown=e=>{if(e.key==='Enter')doLogin()};
+    document.getElementById('ll').onclick=()=>{st.lang=st.lang==='es'?'en':'es';S.rawSet('dp_lang',st.lang);render()};
+    return;
+  }
+
+  // Dashboard
+  const f=filtered();
+  const pc=st.orders.filter(o=>!st.designed[o.id]).length;
+  const dc=st.orders.filter(o=>st.designed[o.id]).length;
+  const isAdmin=st.user?.role==='admin';
+
+  app.innerHTML=`
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">⬡ Studio</div><div class="logo-divider"></div>
+        <div class="header-subtitle">${t('portal')}</div>
+      </div>
+      <div class="header-right">
+        <div class="connection-status"><div class="status-dot ${st.error?'error':''}"></div>${t('connected')}</div>
+        <span class="user-badge ${isAdmin?'admin':''}">${st.user?.name||''}</span>
+        <button class="lang-toggle" id="lt">${st.lang==='es'?'EN':'ES'}</button>
+        <button class="btn-small" id="lo">${t('logout')}</button>
+      </div>
+    </div>
+    <div class="filters-bar">
+      <button class="filter-btn ${st.filter==='all'?'active':''}" data-f="all">${t('all')} <span class="filter-count">${st.orders.length}</span></button>
+      <button class="filter-btn ${st.filter==='pending'?'active':''}" data-f="pending">${t('pendingFilter')} <span class="filter-count">${pc}</span></button>
+      <button class="filter-btn ${st.filter==='designed'?'active':''}" data-f="designed">${t('designedFilter')} <span class="filter-count">${dc}</span></button>
+      <input class="search-input" type="text" placeholder="${t('searchPlaceholder')}" value="${st.search}" id="si">
+      <button class="btn-refresh" id="rf">↻</button>
+    </div>
+    <div class="main">
+      ${st.error?`<div class="error-banner">⚠️ ${st.error}</div>`:''}
+      ${isAdmin?renderAdmin():''}
+      <div class="summary-bar">
+        <div class="summary-card"><div class="summary-label">${t('pendingLabel')}</div><div class="summary-value pending">${pc}</div></div>
+        <div class="summary-card"><div class="summary-label">${t('designedLabel')}</div><div class="summary-value done">${dc}</div></div>
+        <div class="summary-card"><div class="summary-label">${t('totalStickers')}</div><div class="summary-value">${st.orders.reduce((s,o)=>s+o.line_items.reduce((ss,i)=>ss+i.quantity,0),0)}</div></div>
+      </div>
+      ${st.loading?`<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('loading')}</div></div>`:''}
+      ${!st.loading&&f.length===0?`<div class="empty-state"><div class="empty-state-icon">${st.filter==='pending'?'🎉':'📭'}</div><p>${{all:t('emptyAll'),pending:t('emptyPending'),designed:t('emptyDesigned')}[st.filter]}</p></div>`:''}
+      ${!st.loading?f.map(renderOrder).join(''):''}
+    </div>`;
+
+  // Bind events
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{st.filter=b.dataset.f;render()});
+  const si=document.getElementById('si');
+  if(si)si.oninput=()=>{st.search=si.value;render();const el=document.getElementById('si');if(el){el.focus();el.selectionStart=el.selectionEnd=el.value.length}};
+  document.getElementById('rf').onclick=loadOrders;
+  document.getElementById('lo').onclick=()=>{S.del('dp_token');S.del('dp_user');st.token=null;st.user=null;st.orders=[];st.screen='login';render()};
+  document.getElementById('lt').onclick=()=>{st.lang=st.lang==='es'?'en':'es';S.rawSet('dp_lang',st.lang);render()};
+  document.getElementById('at')?.addEventListener('click',()=>{st.adminOpen=!st.adminOpen;render()});
+  document.querySelectorAll('[data-t]').forEach(el=>el.onclick=()=>{st.expanded[el.dataset.t]=!st.expanded[el.dataset.t];render()});
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.d;
+    if(st.designed[id])delete st.designed[id];
+    else st.designed[id]={at:new Date().toISOString(),by:st.user?.name||'Unknown'};
+    S.set('dp_designed',st.designed);render();
+  });
+  document.querySelectorAll('[data-n]').forEach(inp=>{
+    let to;inp.oninput=()=>{clearTimeout(to);to=setTimeout(()=>{st.notes[inp.dataset.n]=inp.value;S.set('dp_notes',st.notes)},300)};
+  });
+}
+
+function renderAdmin(){
+  const stats=designerStats();
+  return `
+    <div class="admin-panel ${st.adminOpen?'open':''}">
+      <div class="admin-header" id="at"><h3>${t('adminPanel')}</h3><span class="expand-icon">${st.adminOpen?'▴':'▾'}</span></div>
+      <div class="admin-body">
+        ${Object.keys(stats).length?Object.entries(stats).map(([n,c])=>`<div class="admin-user-row"><span class="admin-user-name">${n}</span><span class="admin-user-stats">${c} ${t('adminOrders')} ${t('adminDesigned')}</span></div>`).join(''):''}
+        <div class="admin-info">${t('adminInfo')} <code>DESIGNER_USERS</code>:<br><br><code>[{"name":"John","password":"john123"},{"name":"Maria","password":"maria456"}]</code></div>
+      </div>
+    </div>`;
+}
+
+function renderOrder(o){
+  const d=st.designed[o.id],done=!!d,exp=st.expanded[o.id];
+  const qty=o.line_items.reduce((s,i)=>s+i.quantity,0);
+  const note=st.notes[o.id]||'';
+  return `
+    <div class="order-card ${done?'designed':''} ${exp?'expanded':''}" data-order-id="${o.id}">
+      <div class="order-header" data-t="${o.id}">
+        <div class="order-header-left">
+          <span class="order-number">${o.name}</span>
+          <span class="order-date">${formatDate(o.created_at)}</span>
+          <span class="order-item-count">${qty} ${qty>1?t('stickers'):t('sticker')}</span>
+        </div>
+        <div class="order-status">
+          <div>
+            <span class="status-badge ${done?'done':'pending'}">${done?t('statusDone'):t('statusPending')}</span>
+            ${done&&d.by?`<div class="designed-by">${t('designedBy')} ${d.by}</div>`:''}
+          </div>
+          <span class="expand-icon">▾</span>
+        </div>
+      </div>
+      <div class="order-items">
+        ${o.line_items.map(i=>`
+          <div class="order-item">
+            <div class="item-icon">${getIcon(i)}</div>
+            <div class="item-details">
+              <div class="item-name">${i.title}</div>
+              ${i.variant_title?`<div class="item-variant">${i.variant_title}</div>`:''}
+              <div class="item-properties">
+                ${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="item-prop"><span class="prop-label">${p.name}:</span><span class="prop-value">${p.value}</span></div>`).join('')}
+              </div>
+            </div>
+            <div class="item-qty">×${i.quantity}</div>
+          </div>`).join('')}
+      </div>
+      <div class="order-actions">
+        <input class="order-notes-input" type="text" placeholder="${t('notesPlaceholder')}" value="${note.replace(/"/g,'&quot;')}" data-n="${o.id}">
+        <button class="btn-design ${done?'mark-undone':'mark-done'}" data-d="${o.id}">${done?t('markUndone'):t('markDone')}</button>
+      </div>
+    </div>`;
+}
+
+async function loadOrders(){
+  st.loading=true;st.error=null;render();
+  try{st.orders=await apiOrders(st.token);st.loading=false;}
+  catch(e){if(e.message==='UNAUTHORIZED'){st.screen='login';st.loginError=t('sessionExpired');}else st.error=e.message;st.loading=false;}
+  render();
+}
+
+setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading)loadOrders()},60000);
+
+if(st.token&&st.user){st.screen='dashboard';render();loadOrders();}
+else{st.screen='login';render();}
+})();
+</script>
+</body>
+</html>
