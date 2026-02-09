@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designer Portal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1a1a1a;
+            --border: #222;
+            --border-light: #333;
+            --text: #e8e8e8;
+            --text-muted: #888;
+            --text-dim: #555;
+            --accent: #f5c542;
+            --accent-dim: #f5c54233;
+            --green: #34d399;
+            --green-dim: #34d39922;
+            --orange: #fb923c;
+            --orange-dim: #fb923c22;
+            --red: #f87171;
+            --blue: #60a5fa;
+            --blue-dim: #60a5fa22;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* HEADER */
+        .header { border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(10,10,10,0.85); z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+        .logo-divider { width: 1px; height: 20px; background: var(--border-light); }
+        .header-subtitle { font-size: 13px; color: var(--text-muted); }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+        .status-dot.error { background: var(--red); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .connection-status { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .user-badge { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); font-weight: 600; }
+        .user-badge.admin { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+        /* BUTTONS */
+        .btn-small { font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .btn-small:hover { border-color: var(--border-light); color: var(--text); }
+
+        .lang-toggle { font-family: 'Space Mono', monospace; font-size: 11px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+        .lang-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* FILTERS */
+        .filters-bar { padding: 16px 32px; display: flex; gap: 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+        .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .filter-btn:hover { border-color: var(--border-light); color: var(--text); }
+        .filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+        .filter-count { font-family: 'Space Mono', monospace; font-size: 11px; background: var(--border); padding: 2px 6px; border-radius: 4px; }
+        .filter-btn.active .filter-count { background: var(--accent); color: var(--bg); }
+        .search-input { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); outline: none; margin-left: auto; width: 220px; transition: all 0.2s; }
+        .search-input::placeholder { color: var(--text-dim); }
+        .search-input:focus { border-color: var(--accent); width: 280px; }
+        .btn-refresh { font-family: 'DM Sans', sans-serif; font-size: 16px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* MAIN */
+        .main { max-width: 900px; margin: 0 auto; padding: 24px 32px; }
+        .summary-bar { display: flex; gap: 16px; margin-bottom: 32px; }
+        .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; flex: 1; }
+        .summary-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 8px; font-family: 'Space Mono', monospace; }
+        .summary-value { font-size: 28px; font-weight: 700; font-family: 'Space Mono', monospace; }
+        .summary-value.pending { color: var(--orange); }
+        .summary-value.done { color: var(--green); }
+
+        /* ORDER CARDS */
+        .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 16px; overflow: hidden; transition: all 0.25s ease; }
+        .order-card:hover { border-color: var(--border-light); transform: translateY(-1px); }
+        .order-card.designed { opacity: 0.5; }
+        .order-card.designed:hover { opacity: 0.8; }
+        .order-header { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+        .order-header-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .order-number { font-family: 'Space Mono', monospace; font-size: 15px; font-weight: 700; color: var(--accent); }
+        .order-date { font-size: 12px; color: var(--text-dim); }
+        .order-item-count { font-size: 12px; color: var(--text-muted); background: var(--border); padding: 4px 10px; border-radius: 6px; }
+        .order-status { display: flex; align-items: center; gap: 8px; }
+        .status-badge { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; padding: 6px 14px; border-radius: 6px; }
+        .status-badge.pending { background: var(--orange-dim); color: var(--orange); border: 1px solid #fb923c44; }
+        .status-badge.done { background: var(--green-dim); color: var(--green); border: 1px solid #34d39944; }
+        .expand-icon { color: var(--text-dim); transition: transform 0.3s ease; font-size: 18px; }
+        .order-card.expanded .expand-icon { transform: rotate(180deg); }
+        .designed-by { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+        /* ORDER ITEMS */
+        .order-items { display: none; border-top: 1px solid var(--border); }
+        .order-card.expanded .order-items { display: block; animation: slideDown 0.2s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .order-item { padding: 20px 24px; display: flex; align-items: flex-start; gap: 20px; border-bottom: 1px solid var(--border); }
+        .order-item:last-child { border-bottom: none; }
+        .item-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .item-details { flex: 1; }
+        .item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .item-variant { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+        .item-properties { display: flex; flex-wrap: wrap; gap: 8px; }
+        .item-prop { font-size: 12px; padding: 5px 12px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+        .prop-label { color: var(--text-dim); }
+        .prop-value { color: var(--text); font-weight: 500; }
+        .item-qty { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--text-muted); background: var(--bg); padding: 6px 12px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+
+        /* ACTIONS */
+        .order-actions { padding: 16px 24px; border-top: 1px solid var(--border); display: none; justify-content: space-between; align-items: center; gap: 12px; }
+        .order-card.expanded .order-actions { display: flex; }
+        .btn-design { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .btn-design.mark-done { background: var(--accent); color: var(--bg); }
+        .btn-design.mark-done:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .btn-design.mark-undone { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-design.mark-undone:hover { border-color: var(--red); color: var(--red); }
+        .order-notes-input { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; flex: 1; min-width: 0; }
+        .order-notes-input::placeholder { color: var(--text-dim); }
+        .order-notes-input:focus { border-color: var(--accent); }
+
+        /* LOADING */
+        .loading-state { text-align: center; padding: 80px 32px; }
+        .loading-spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 13px; color: var(--text-dim); }
+
+        /* LOGIN */
+        .login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; align-items: center; justify-content: center; }
+        .login-modal { width: 400px; max-width: 90vw; text-align: center; }
+        .login-logo { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+        .login-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 40px; }
+        .login-field { margin-bottom: 16px; text-align: left; }
+        .login-field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 8px; font-family: 'Space Mono', monospace; }
+        .login-field input { font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 100%; transition: all 0.2s; }
+        .login-field input:focus { border-color: var(--accent); }
+        .login-submit { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 10px; border: none; background: var(--accent); color: var(--bg); cursor: pointer; width: 100%; margin-top: 8px; transition: all 0.2s; }
+        .login-submit:hover { filter: brightness(1.1); }
+        .login-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .login-error { font-size: 13px; color: var(--red); margin-top: 12px; min-height: 20px; }
+        .login-lang { margin-top: 24px; }
+
+        .empty-state { text-align: center; padding: 60px 32px; color: var(--text-dim); }
+        .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state p { font-size: 14px; line-height: 1.6; }
+        .error-banner { background: #f8717122; border: 1px solid #f8717144; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; font-size: 13px; color: var(--red); display: flex; align-items: center; gap: 10px; }
+
+        /* ADMIN PANEL */
+        .admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 24px; overflow: hidden; }
+        .admin-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .admin-header h3 { font-size: 14px; color: var(--blue); display: flex; align-items: center; gap: 8px; }
+        .admin-body { padding: 20px 24px; display: none; }
+        .admin-panel.open .admin-body { display: block; }
+        .admin-user-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .admin-user-row:last-child { border-bottom: none; }
+        .admin-user-name { font-weight: 600; font-size: 14px; flex: 1; }
+        .admin-user-pw { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg); padding: 4px 8px; border-radius: 4px; }
+        .admin-user-stats { font-size: 12px; color: var(--text-muted); }
+        .admin-info { font-size: 12px; color: var(--text-dim); line-height: 1.6; margin-top: 16px; padding: 12px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+        .admin-info code { background: var(--border); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--accent); }
+
+        /* RESPONSIVE */
+        @media (max-width: 640px) {
+            .header { padding: 16px 20px; }
+            .filters-bar { padding: 12px 20px; }
+            .main { padding: 16px 20px; }
+            .summary-bar { flex-direction: column; gap: 12px; }
+            .search-input { width: 100% !important; margin-left: 0; }
+            .order-header { padding: 16px; }
+            .order-item { padding: 16px; flex-wrap: wrap; }
+            .order-actions { flex-direction: column; }
+            .header-subtitle { display: none; }
+            .logo-divider { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+    (() => {
+        // ============================================
+        // i18n
+        // ============================================
+        const translations = {
+            en: {
+                portal: 'Design Portal',
+                password: 'Password',
+                login: 'Log in',
+                loginError: 'Incorrect password',
+                sessionExpired: 'Session expired. Please log in again.',
+                connected: 'Connected',
+                logout: 'Log out',
+                all: 'All',
+                pendingFilter: 'Pending',
+                designedFilter: 'Designed',
+                searchPlaceholder: 'Search order or design...',
+                pendingLabel: 'Pending',
+                designedLabel: 'Designed',
+                totalStickers: 'Total Stickers',
+                sticker: 'sticker',
+                stickers: 'stickers',
+                statusPending: '● Pending',
+                statusDone: '✓ Designed',
+                markDone: '✓ Mark as designed',
+                markUndone: 'Unmark',
+                notesPlaceholder: 'Designer notes...',
+                loading: 'Loading orders...',
+                connecting: 'Connecting...',
+                emptyAll: 'No unfulfilled orders',
+                emptyPending: 'No pending orders 🎉',
+                emptyDesigned: 'No orders marked as designed yet',
+                designedBy: 'by',
+                adminPanel: '⚙ Admin — Designers',
+                adminInfo: 'To add designers, go to Vercel → Settings → Environment Variables and edit',
+                adminDesigned: 'designed',
+                adminOrders: 'orders',
+            },
+            es: {
+                portal: 'Portal de Diseño',
+                password: 'Contraseña',
+                login: 'Entrar',
+                loginError: 'Contraseña incorrecta',
+                sessionExpired: 'Sesión expirada. Vuelve a entrar.',
+                connected: 'Conectado',
+                logout: 'Cerrar sesión',
+                all: 'Todos',
+                pendingFilter: 'Pendientes',
+                designedFilter: 'Diseñados',
+                searchPlaceholder: 'Buscar pedido o diseño...',
+                pendingLabel: 'Pendientes',
+                designedLabel: 'Diseñados',
+                totalStickers: 'Total Stickers',
+                sticker: 'sticker',
+                stickers: 'stickers',
+                statusPending: '● Pendiente',
+                statusDone: '✓ Diseñado',
+                markDone: '✓ Marcar como diseñado',
+                markUndone: 'Desmarcar',
+                notesPlaceholder: 'Notas del diseñador...',
+                loading: 'Cargando pedidos...',
+                connecting: 'Conectando...',
+                emptyAll: 'No hay pedidos sin preparar',
+                emptyPending: 'No hay pedidos pendientes 🎉',
+                emptyDesigned: 'Aún no has marcado ningún pedido',
+                designedBy: 'por',
+                adminPanel: '⚙ Admin — Diseñadores',
+                adminInfo: 'Para añadir diseñadores, ve a Vercel → Settings → Environment Variables y edita',
+                adminDesigned: 'diseñados',
+                adminOrders: 'pedidos',
+            }
+        };
+
+        function t(key) { return translations[state.lang][key] || key; }
+
+        // ============================================
+        // STORAGE
+        // ============================================
+        const DESIGNED_KEY = 'dp_designed';
+        const NOTES_KEY = 'dp_notes';
+        const TOKEN_KEY = 'dp_token';
+        const LANG_KEY = 'dp_lang';
+        const USER_KEY = 'dp_user';
+
+        const storage = {
+            getDesigned: () => { try { return JSON.parse(localStorage.getItem(DESIGNED_KEY)) || {}; } catch { return {}; } },
+            setDesigned: (d) => localStorage.setItem(DESIGNED_KEY, JSON.stringify(d)),
+            getNotes: () => { try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; } catch { return {}; } },
+            setNotes: (n) => localStorage.setItem(NOTES_KEY, JSON.stringify(n)),
+            getToken: () => localStorage.getItem(TOKEN_KEY),
+            setToken: (t) => localStorage.setItem(TOKEN_KEY, t),
+            clearToken: () => localStorage.removeItem(TOKEN_KEY),
+            getLang: () => localStorage.getItem(LANG_KEY) || (navigator.language.startsWith('es') ? 'es' : 'en'),
+            setLang: (l) => localStorage.setItem(LANG_KEY, l),
+            getUser: () => { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; } },
+            setUser: (u) => localStorage.setItem(USER_KEY, JSON.stringify(u)),
+            clearUser: () => localStorage.removeItem(USER_KEY),
+        };
+
+        // ============================================
+        // API
+        // ============================================
+        async function apiLogin(password) {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            if (!res.ok) throw new Error('Incorrect password');
+            return await res.json();
+        }
+
+        async function apiGetOrders(token) {
+            const res = await fetch('/api/orders', {
+                headers: { 'X-Auth-Token': token }
+            });
+            if (res.status === 401) { storage.clearToken(); storage.clearUser(); throw new Error('UNAUTHORIZED'); }
+            if (!res.ok) throw new Error('Error loading orders');
+            const data = await res.json();
+            return data.orders || [];
+        }
+
+        // ============================================
+        // STATE
+        // ============================================
+        const state = {
+            screen: 'loading',
+            orders: [],
+            loading: false,
+            error: null,
+            filter: 'all',
+            search: '',
+            expanded: {},
+            designed: storage.getDesigned(),
+            notes: storage.getNotes(),
+            token: storage.getToken(),
+            user: storage.getUser(),
+            lang: storage.getLang(),
+            loginError: '',
+            adminOpen: false,
+        };
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return d.toLocaleDateString(state.lang === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        const ITEM_ICONS = { Text: '✏️', Flag: '🏳️', Emoji: '😀', Number: '🔢', Image: '🖼️', Icon: '⭐', Logo: '🎨' };
+
+        function getItemIcon(item) {
+            const type = (item.properties || []).find(p => ['Tipo','tipo','Type','type'].includes(p.name));
+            return type ? (ITEM_ICONS[type.value] || '📦') : '📦';
+        }
+
+        function getFilteredOrders() {
+            let orders = [...state.orders];
+            if (state.filter === 'pending') orders = orders.filter(o => !state.designed[o.id]);
+            else if (state.filter === 'designed') orders = orders.filter(o => state.designed[o.id]);
+            if (state.search.trim()) {
+                const q = state.search.toLowerCase();
+                orders = orders.filter(o => {
+                    if (o.name.toLowerCase().includes(q)) return true;
+                    return o.line_items.some(item =>
+                        (item.title || '').toLowerCase().includes(q) ||
+                        (item.variant_title || '').toLowerCase().includes(q) ||
+                        (item.properties || []).some(p => (p.value || '').toLowerCase().includes(q))
+                    );
+                });
+            }
+            return orders;
+        }
+
+        function getDesignerStats() {
+            const stats = {};
+            Object.values(state.designed).forEach(d => {
+                if (d && d.by) {
+                    stats[d.by] = (stats[d.by] || 0) + 1;
+                }
+            });
+            return stats;
+        }
+
+        // ============================================
+        // RENDER
+        // ============================================
+        function render() {
+            const app = document.getElementById('app');
+            document.documentElement.lang = state.lang;
+
+            if (state.screen === 'loading') {
+                app.innerHTML = `<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('connecting')}</div></div>`;
+                return;
+            }
+            if (state.screen === 'login') {
+                app.innerHTML = renderLogin();
+                bindLoginEvents();
+                return;
+            }
+
+            const filtered = getFilteredOrders();
+            const pendingCount = state.orders.filter(o => !state.designed[o.id]).length;
+            const doneCount = state.orders.filter(o => state.designed[o.id]).length;
+
+            app.innerHTML = `
+                ${renderHeader()}
+                ${renderFilters(pendingCount, doneCount)}
+                <div class="main">
+                    ${state.error ? `<div class="error-banner">⚠️ ${state.error}</div>` : ''}
+                    ${state.user?.role === 'admin' ? renderAdminPanel() : ''}
+                    ${renderSummary(pendingCount, doneCount)}
+                    ${state.loading ? `<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('loading')}</div></div>` : ''}
+                    ${!state.loading && filtered.length === 0 ? renderEmpty() : ''}
+                    ${!state.loading ? filtered.map(renderOrderCard).join('') : ''}
+                </div>
+            `;
+            bindDashboardEvents();
+        }
+
+        function renderLogin() {
+            return `
+                <div class="login-overlay">
+                    <div class="login-modal">
+                        <div class="login-logo">⬡ Studio</div>
+                        <div class="login-subtitle">${t('portal')}</div>
+                        <div class="login-field">
+                            <label>${t('password')}</label>
+                            <input type="password" id="login-pw" placeholder="${t('password')}" autofocus>
+                        </div>
+                        <button class="login-submit" id="login-btn">${t('login')}</button>
+                        <div class="login-error" id="login-error">${state.loginError}</div>
+                        <div class="login-lang">
+                            <button class="lang-toggle" id="lang-toggle-login">${state.lang === 'es' ? 'EN' : 'ES'}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHeader() {
+            const userName = state.user?.name || '';
+            const isAdmin = state.user?.role === 'admin';
+            return `
+                <div class="header">
+                    <div class="header-left">
+                        <div class="logo">⬡ Studio</div>
+                        <div class="logo-divider"></div>
+                        <div class="header-subtitle">${t('portal')}</div>
+                    </div>
+                    <div class="header-right">
+                        <div class="connection-status">
+                            <div class="status-dot ${state.error ? 'error' : ''}"></div>
+                            ${t('connected')}
+                        </div>
+                        <span class="user-badge ${isAdmin ? 'admin' : ''}">${userName}</span>
+                        <button class="lang-toggle" id="lang-toggle">${state.lang === 'es' ? 'EN' : 'ES'}</button>
+                        <button class="btn-small" id="btn-logout">${t('logout')}</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFilters(pending, done) {
+            return `
+                <div class="filters-bar">
+                    <button class="filter-btn ${state.filter === 'all' ? 'active' : ''}" data-filter="all">
+                        ${t('all')} <span class="filter-count">${state.orders.length}</span>
+                    </button>
+                    <button class="filter-btn ${state.filter === 'pending' ? 'active' : ''}" data-filter="pending">
+                        ${t('pendingFilter')} <span class="filter-count">${pending}</span>
+                    </button>
+                    <button class="filter-btn ${state.filter === 'designed' ? 'active' : ''}" data-filter="designed">
+                        ${t('designedFilter')} <span class="filter-count">${done}</span>
+                    </button>
+                    <input class="search-input" type="text" placeholder="${t('searchPlaceholder')}" value="${state.search}" id="search-input">
+                    <button class="btn-refresh" id="btn-refresh" title="Refresh">↻</button>
+                </div>
+            `;
+        }
+
+        function renderSummary(pending, done) {
+            return `
+                <div class="summary-bar">
+                    <div class="summary-card">
+                        <div class="summary-label">${t('pendingLabel')}</div>
+                        <div class="summary-value pending">${pending}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">${t('designedLabel')}</div>
+                        <div class="summary-value done">${done}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">${t('totalStickers')}</div>
+                        <div class="summary-value">${state.orders.reduce((s, o) => s + o.line_items.reduce((ss, i) => ss + i.quantity, 0), 0)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdminPanel() {
+            const stats = getDesignerStats();
+            let usersEnv = [];
+            try { usersEnv = JSON.parse('[]'); } catch {}
+
+            return `
+                <div class="admin-panel ${state.adminOpen ? 'open' : ''}">
+                    <div class="admin-header" id="admin-toggle">
+                        <h3>${t('adminPanel')}</h3>
+                        <span class="expand-icon">${state.adminOpen ? '▴' : '▾'}</span>
+                    </div>
+                    <div class="admin-body">
+                        ${Object.keys(stats).length > 0 ? `
+                            <div style="margin-bottom: 16px;">
+                                ${Object.entries(stats).map(([name, count]) => `
+                                    <div class="admin-user-row">
+                                        <span class="admin-user-name">${name}</span>
+                                        <span class="admin-user-stats">${count} ${t('adminOrders')} ${t('adminDesigned')}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="admin-info">
+                            ${t('adminInfo')} <code>DESIGNER_USERS</code>:<br><br>
+                            <code>[{"name":"John","password":"john123"},{"name":"Maria","password":"maria456"}]</code>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOrderCard(order) {
+            const designData = state.designed[order.id];
+            const isDesigned = !!designData;
+            const isExpanded = state.expanded[order.id];
+            const note = state.notes[order.id] || '';
+            const totalItems = order.line_items.reduce((s, i) => s + i.quantity, 0);
+            const stickerWord = totalItems > 1 ? t('stickers') : t('sticker');
+
+            return `
+                <div class="order-card ${isDesigned ? 'designed' : ''} ${isExpanded ? 'expanded' : ''}" data-order-id="${order.id}">
+                    <div class="order-header" data-toggle="${order.id}">
+                        <div class="order-header-left">
+                            <span class="order-number">${order.name}</span>
+                            <span class="order-date">${formatDate(order.created_at)}</span>
+                            <span class="order-item-count">${totalItems} ${stickerWord}</span>
+                        </div>
+                        <div class="order-status">
+                            <div>
+                                <span class="status-badge ${isDesigned ? 'done' : 'pending'}">
+                                    ${isDesigned ? t('statusDone') : t('statusPending')}
+                                </span>
+                                ${isDesigned && designData.by ? `<div class="designed-by">${t('designedBy')} ${designData.by}</div>` : ''}
+                            </div>
+                            <span class="expand-icon">▾</span>
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        ${order.line_items.map(item => `
+                            <div class="order-item">
+                                <div class="item-icon">${getItemIcon(item)}</div>
+                                <div class="item-details">
+                                    <div class="item-name">${item.title}</div>
+                                    ${item.variant_title ? `<div class="item-variant">${item.variant_title}</div>` : ''}
+                                    <div class="item-properties">
+                                        ${(item.properties || []).filter(p => p.name && p.value && !p.name.startsWith('_')).map(prop => `
+                                            <div class="item-prop">
+                                                <span class="prop-label">${prop.name}:</span>
+                                                <span class="prop-value">${prop.value}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div class="item-qty">×${item.quantity}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-actions">
+                        <input class="order-notes-input" type="text" placeholder="${t('notesPlaceholder')}" value="${note.replace(/"/g, '&quot;')}" data-note-id="${order.id}">
+                        <button class="btn-design ${isDesigned ? 'mark-undone' : 'mark-done'}" data-design-id="${order.id}">
+                            ${isDesigned ? t('markUndone') : t('markDone')}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEmpty() {
+            const msgs = { all: t('emptyAll'), pending: t('emptyPending'), designed: t('emptyDesigned') };
+            return `
+                <div class="empty-state">
+                    <div class="empty-state-icon">${state.filter === 'pending' ? '🎉' : '📭'}</div>
+                    <p>${msgs[state.filter]}</p>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // EVENTS
+        // ============================================
+        function bindLoginEvents() {
+            const btn = document.getElementById('login-btn');
+            const pw = document.getElementById('login-pw');
+
+            async function doLogin() {
+                const password = pw.value.trim();
+                if (!password) return;
+                btn.disabled = true;
+                btn.textContent = '...';
+                try {
+                    const data = await apiLogin(password);
+                    storage.setToken(data.token);
+                    storage.setUser({ name: data.name, role: data.role });
+                    state.token = data.token;
+                    state.user = { name: data.name, role: data.role };
+                    state.loginError = '';
+                    state.screen = 'dashboard';
+                    render();
+                    loadOrders();
+                } catch (e) {
+                    state.loginError = t('loginError');
+                    render();
+                }
+            }
+
+            btn.addEventListener('click', doLogin);
+            pw.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+
+            document.getElementById('lang-toggle-login')?.addEventListener('click', () => {
+                state.lang = state.lang === 'es' ? 'en' : 'es';
+                storage.setLang(state.lang);
+                render();
+            });
+        }
+
+        function bindDashboardEvents() {
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                btn.addEventListener('click', () => { state.filter = btn.dataset.filter; render(); });
+            });
+
+            const searchEl = document.getElementById('search-input');
+            if (searchEl) {
+                searchEl.addEventListener('input', (e) => {
+                    state.search = e.target.value;
+                    render();
+                    const el = document.getElementById('search-input');
+                    if (el) { el.focus(); el.selectionStart = el.selectionEnd = el.value.length; }
+                });
+            }
+
+            document.getElementById('btn-refresh')?.addEventListener('click', loadOrders);
+
+            document.getElementById('btn-logout')?.addEventListener('click', () => {
+                storage.clearToken();
+                storage.clearUser();
+                state.token = null;
+                state.user = null;
+                state.orders = [];
+                state.screen = 'login';
+                render();
+            });
+
+            document.getElementById('lang-toggle')?.addEventListener('click', () => {
+                state.lang = state.lang === 'es' ? 'en' : 'es';
+                storage.setLang(state.lang);
+                render();
+            });
+
+            document.getElementById('admin-toggle')?.addEventListener('click', () => {
+                state.adminOpen = !state.adminOpen;
+                render();
+            });
+
+            document.querySelectorAll('[data-toggle]').forEach(el => {
+                el.addEventListener('click', () => { state.expanded[el.dataset.toggle] = !state.expanded[el.dataset.toggle]; render(); });
+            });
+
+            document.querySelectorAll('[data-design-id]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.designId;
+                    if (state.designed[id]) {
+                        delete state.designed[id];
+                    } else {
+                        state.designed[id] = {
+                            at: new Date().toISOString(),
+                            by: state.user?.name || 'Unknown'
+                        };
+                    }
+                    storage.setDesigned(state.designed);
+                    render();
+                });
+            });
+
+            document.querySelectorAll('[data-note-id]').forEach(input => {
+                let timeout;
+                input.addEventListener('input', () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        state.notes[input.dataset.noteId] = input.value;
+                        storage.setNotes(state.notes);
+                    }, 300);
+                });
+            });
+        }
+
+        // ============================================
+        // DATA
+        // ============================================
+        async function loadOrders() {
+            state.loading = true;
+            state.error = null;
+            render();
+            try {
+                state.orders = await apiGetOrders(state.token);
+                state.loading = false;
+            } catch (e) {
+                if (e.message === 'UNAUTHORIZED') {
+                    state.screen = 'login';
+                    state.loginError = t('sessionExpired');
+                } else {
+                    state.error = e.message;
+                }
+                state.loading = false;
+            }
+            render();
+        }
+
+        // Auto-refresh every 60s
+        setInterval(() => {
+            if (state.screen === 'dashboard' && state.token && !state.loading) loadOrders();
+        }, 60000);
+
+        // ============================================
+        // BOOT
+        // ============================================
+        if (state.token && state.user) {
+            state.screen = 'dashboard';
+            render();
+            loadOrders();
+        } else {
+            state.screen = 'login';
+            render();
+        }
+    })();
+    </script>
+</body>
+</html>
