@@ -11,18 +11,31 @@
         [data-theme="light"]{--bg:#f5f5f5;--surface:#ffffff;--border:#e0e0e0;--border-light:#ccc;--text:#1a1a1a;--text-muted:#666;--text-dim:#999;--accent:#c9960c;--accent-dim:#c9960c15;--green:#16a34a;--green-dim:#16a34a12;--orange:#ea580c;--orange-dim:#ea580c12;--red:#dc2626;--blue:#2563eb;--blue-dim:#2563eb12;--header-bg:rgba(245,245,245,.92);--modal-bg:rgba(0,0,0,.35);--input-bg:#fff;--select-bg:#fff;--scheme:light}
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
-        .header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--header-bg);z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:background .2s}
+        .header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--header-bg);z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
         .header-left{display:flex;align-items:center;gap:14px}
         .logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
         .logo-divider{width:1px;height:18px;background:var(--border-light)}
         .header-subtitle{font-size:12px;color:var(--text-muted);font-weight:400}
         .header-right{display:flex;align-items:center;gap:10px}
-        .user-badge{font-size:10px;padding:3px 8px;border-radius:5px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);font-weight:600;letter-spacing:.5px}
+        .user-badge{font-size:10px;padding:3px 8px;border-radius:5px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);font-weight:600}
         .user-badge.admin{background:var(--blue-dim);color:var(--blue);border-color:var(--blue)}
         .btn-s{font-family:'Poppins',sans-serif;font-size:11px;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s;font-weight:500}
         .btn-s:hover{border-color:var(--border-light);color:var(--text)}
         .lang-btn,.theme-btn{font-family:'Space Mono',monospace;font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;letter-spacing:1px;transition:all .15s}
         .lang-btn:hover,.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+        .sync-indicator{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px}
+        .sync-indicator.syncing{color:var(--orange)}
+        .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+        /* SHOP TABS */
+        .shop-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 28px;gap:0}
+        .shop-tab{font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;padding:12px 24px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;position:relative}
+        .shop-tab:hover{color:var(--text)}
+        .shop-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+        .shop-tab-count{font-family:'Space Mono',monospace;font-size:10px;background:var(--border);padding:1px 5px;border-radius:3px;margin-left:6px}
+        .shop-tab.active .shop-tab-count{background:var(--accent);color:#fff}
+        [data-theme="dark"] .shop-tab.active .shop-tab-count{color:var(--bg)}
+
         .toolbar{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
         .tb-group{display:flex;gap:4px;align-items:center}
         .tb-btn{font-family:'Poppins',sans-serif;font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;font-weight:500}
@@ -36,11 +49,10 @@
         .tb-search::placeholder{color:var(--text-dim)}
         .tb-search:focus{border-color:var(--accent);width:240px}
         .tb-date{font-family:'Poppins',sans-serif;font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);outline:none;color-scheme:var(--scheme)}
-        .tb-date:focus{border-color:var(--accent)}
         .tb-select{font-family:'Poppins',sans-serif;font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--select-bg);color:var(--text-muted);outline:none;cursor:pointer;color-scheme:var(--scheme)}
         .content{max-width:1100px;margin:0 auto;padding:20px 28px}
         .stats{display:flex;gap:12px;margin-bottom:20px}
-        .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1;display:flex;align-items:center;justify-content:space-between;transition:background .2s}
+        .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1;display:flex;align-items:center;justify-content:space-between}
         .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-dim);font-family:'Space Mono',monospace}
         .stat-val{font-size:22px;font-weight:700;font-family:'Space Mono',monospace}
         .stat-val.p{color:var(--orange)}.stat-val.d{color:var(--green)}
@@ -49,43 +61,44 @@
         .order-row:hover{background:var(--surface)}
         .order-row.designed-row{opacity:.45}
         .order-row.designed-row:hover{opacity:.7}
-        .row-check{width:28px;height:28px;border-radius:7px;border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:14px;flex-shrink:0}
+        .row-check{width:28px;height:28px;border-radius:7px;border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:14px}
         .row-check:hover{border-color:var(--accent);background:var(--accent-dim)}
         .row-check.checked{border-color:var(--green);background:var(--green-dim);color:var(--green)}
         .row-check.saving{opacity:.5;pointer-events:none}
         .row-order{font-family:'Space Mono',monospace;font-weight:700;color:var(--accent);font-size:13px}
-        .row-items{color:var(--text-muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
-        .row-date{color:var(--text-dim);font-size:12px;font-weight:400}
+        .row-items{color:var(--text-muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .row-date{color:var(--text-dim);font-size:12px}
         .row-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-muted)}
         .row-status{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:4px 10px;border-radius:5px;text-align:center;white-space:nowrap}
         .row-status.pending{background:var(--orange-dim);color:var(--orange)}
         .row-status.done{background:var(--green-dim);color:var(--green)}
-        .row-by{font-size:9px;color:var(--text-dim);margin-top:2px;text-align:center;font-weight:400}
+        .row-by{font-size:9px;color:var(--text-dim);margin-top:2px;text-align:center}
         .row-open{font-size:16px;color:var(--text-dim);transition:color .15s}
         .order-row:hover .row-open{color:var(--accent)}
-        .modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s ease}
+        .modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);animation:fadeIn .15s ease}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:560px;max-width:92vw;max-height:85vh;overflow:auto;animation:slideUp .2s ease;transition:background .2s}
+        .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:560px;max-width:92vw;max-height:85vh;overflow:auto;animation:slideUp .2s ease}
         @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
         .modal-head-left{display:flex;align-items:center;gap:12px}
         .modal-order-num{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent)}
-        .modal-date{font-size:12px;color:var(--text-dim);font-weight:400}
+        .modal-date{font-size:12px;color:var(--text-dim)}
+        .modal-shop-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue);font-weight:500}
         .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
         .modal-close:hover{border-color:var(--red);color:var(--red)}
         .modal-body{padding:20px 24px}
-        .modal-item{padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:background .2s}
+        .modal-item{padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
         .modal-item:last-child{margin-bottom:0}
         .mi-icon{width:40px;height:40px;border-radius:9px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
         .mi-info{flex:1;min-width:0}
         .mi-title{font-weight:600;font-size:13px;margin-bottom:2px}
-        .mi-variant{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:400}
+        .mi-variant{font-size:12px;color:var(--text-muted);margin-bottom:8px}
         .mi-props{display:flex;flex-wrap:wrap;gap:6px}
-        .mi-prop{font-size:11px;padding:4px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;gap:5px;transition:background .2s}
-        .mi-prop-l{color:var(--text-dim);font-weight:400}.mi-prop-v{color:var(--text);font-weight:500}
+        .mi-prop{font-size:11px;padding:4px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;gap:5px}
+        .mi-prop-l{color:var(--text-dim)}.mi-prop-v{color:var(--text);font-weight:500}
         .mi-qty{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-muted);padding:4px 10px;background:var(--surface);border-radius:5px;flex-shrink:0}
         .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;position:sticky;bottom:0;background:var(--surface)}
-        .modal-notes{font-family:'Poppins',sans-serif;font-size:12px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;flex:1;transition:background .2s;font-weight:400}
+        .modal-notes{font-family:'Poppins',sans-serif;font-size:12px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;flex:1}
         .modal-notes::placeholder{color:var(--text-dim)}
         .modal-notes:focus{border-color:var(--accent)}
         .modal-btn{font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:8px 20px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
@@ -95,46 +108,44 @@
         .modal-btn.undone{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
         .modal-btn.undone:hover{border-color:var(--red);color:var(--red)}
         .modal-btn:disabled{opacity:.5;pointer-events:none}
-        .admin-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;padding:14px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;transition:background .2s}
+        .admin-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;padding:14px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
         .admin-bar-title{font-size:12px;color:var(--blue);font-weight:600}
-        .admin-chip{font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px;transition:background .2s}
+        .admin-chip{font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px}
         .admin-chip-name{font-weight:600;color:var(--text)}
         .admin-chip-count{color:var(--text-muted);font-family:'Space Mono',monospace;font-size:10px}
-        .admin-help{font-size:10px;color:var(--text-dim);margin-left:auto;font-weight:400}
+        .admin-help{font-size:10px;color:var(--text-dim);margin-left:auto}
         .admin-help code{background:var(--border);padding:1px 5px;border-radius:3px;font-size:10px;color:var(--accent)}
         .loading-state{text-align:center;padding:80px 32px}
         .loading-spinner{width:28px;height:28px;border:2px solid var(--border);border-top:2px solid var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
         @keyframes spin{to{transform:rotate(360deg)}}
-        .loading-text{font-size:12px;color:var(--text-dim);font-weight:400}
-        .login-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;transition:background .2s}
+        .loading-text{font-size:12px;color:var(--text-dim)}
+        .login-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center}
         .login-modal{width:380px;max-width:90vw;text-align:center}
         .login-logo{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
-        .login-sub{font-size:13px;color:var(--text-muted);margin-bottom:36px;font-weight:400}
+        .login-sub{font-size:13px;color:var(--text-muted);margin-bottom:36px}
         .login-field{margin-bottom:14px;text-align:left}
         .login-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:6px;font-family:'Space Mono',monospace}
-        .login-field input{font-family:'Poppins',sans-serif;font-size:14px;padding:12px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%;font-weight:400}
+        .login-field input{font-family:'Poppins',sans-serif;font-size:14px;padding:12px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%}
         .login-field input:focus{border-color:var(--accent)}
         .login-btn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;padding:12px 28px;border-radius:9px;border:none;background:var(--accent);color:#fff;cursor:pointer;width:100%;margin-top:6px}
         [data-theme="dark"] .login-btn{color:var(--bg)}
         .login-btn:hover{filter:brightness(1.1)}.login-btn:disabled{opacity:.5}
-        .login-err{font-size:12px;color:var(--red);margin-top:10px;min-height:18px;font-weight:400}
+        .login-err{font-size:12px;color:var(--red);margin-top:10px;min-height:18px}
         .login-lang{margin-top:20px;display:flex;gap:8px;justify-content:center}
         .empty-state{text-align:center;padding:50px 32px;color:var(--text-dim)}
         .empty-state-icon{font-size:40px;margin-bottom:12px}
-        .error-banner{background:var(--orange-dim);border:1px solid var(--orange);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red);font-weight:400}
-        .sync-indicator{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px}
-        .sync-indicator.syncing{color:var(--orange)}
-        .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-        @media(max-width:768px){.header{padding:14px 18px}.toolbar{padding:10px 18px}.content{padding:16px 18px}.stats{flex-direction:column;gap:8px}.list-header{display:none}.order-row{grid-template-columns:32px 1fr auto auto;gap:8px;padding:10px 12px}.row-date,.row-count{display:none}.tb-search{width:100%;margin-left:0}.tb-search:focus{width:100%}.header-subtitle,.logo-divider{display:none}.modal{border-radius:12px;margin:8px}.admin-help{display:none}}
+        .error-banner{background:var(--orange-dim);border:1px solid var(--orange);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red)}
+        @media(max-width:768px){.header{padding:14px 18px}.shop-tabs{padding:0 18px;overflow-x:auto}.toolbar{padding:10px 18px}.content{padding:16px 18px}.stats{flex-direction:column;gap:8px}.list-header{display:none}.order-row{grid-template-columns:32px 1fr auto auto;gap:8px;padding:10px 12px}.row-date,.row-count{display:none}.tb-search{width:100%;margin-left:0}.header-subtitle,.logo-divider{display:none}.modal{border-radius:12px;margin:8px}.admin-help{display:none}}
     </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 (()=>{
-const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Synced',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search order or design...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No unfulfilled orders',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week',syncing:'Syncing...'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Sincronizado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar pedido o diseño...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana',syncing:'Sincronizando...'}};
+const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Synced',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No unfulfilled orders',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week',syncing:'Syncing...'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Sincronizado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana',syncing:'Sincronizando...'}};
 const LS={g:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}},s:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),d:k=>localStorage.removeItem(k),r:k=>localStorage.getItem(k),w:(k,v)=>localStorage.setItem(k,v)};
-const st={screen:'loading',orders:[],loading:false,error:null,filter:'all',search:'',designed:{},notes:{},token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:'',saving:{}};
+
+const st={screen:'loading',shops:[],activeShop:null,orders:{},designed:{},notes:{},loading:false,error:null,filter:'all',search:'',token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:'',saving:{}};
 document.documentElement.setAttribute('data-theme',st.theme);
 const t=k=>T[st.lang][k]||k;
 const fmtD=iso=>new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short'});
@@ -142,19 +153,22 @@ const fmtDT=iso=>new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB'
 const IC={Text:'✏️',Flag:'🏳️',Emoji:'😀',Number:'🔢',Image:'🖼️',Icon:'⭐',Logo:'🎨'};
 const gI=i=>{const p=(i.properties||[]).find(p=>['Tipo','tipo','Type','type'].includes(p.name));return p?(IC[p.value]||'📦'):'📦'};
 const iSum=o=>o.line_items.map(i=>{const d=(i.properties||[]).find(p=>['Diseño','diseño','Design','design'].includes(p.name));return d?d.value:i.variant_title||''}).filter(Boolean).join(', ');
-function gF(){let o=[...st.orders];if(st.filter==='pending')o=o.filter(x=>!st.designed[x.id]);else if(st.filter==='designed')o=o.filter(x=>st.designed[x.id]);if(st.dateFrom){const d=new Date(st.dateFrom);d.setHours(0,0,0,0);o=o.filter(x=>new Date(x.created_at)>=d)}if(st.dateTo){const d=new Date(st.dateTo);d.setHours(23,59,59,999);o=o.filter(x=>new Date(x.created_at)<=d)}if(st.search.trim()){const q=st.search.toLowerCase();o=o.filter(x=>x.name.toLowerCase().includes(q)||x.line_items.some(i=>(i.title||'').toLowerCase().includes(q)||(i.variant_title||'').toLowerCase().includes(q)||(i.properties||[]).some(p=>(p.value||'').toLowerCase().includes(q))))}o.sort((a,b)=>st.sort==='oldest'?new Date(a.created_at)-new Date(b.created_at):new Date(b.created_at)-new Date(a.created_at));return o}
-function dS(){const s={};Object.values(st.designed).forEach(d=>{if(d?.by)s[d.by]=(s[d.by]||0)+1});return s}
 
-// API calls
+function curOrders(){return st.orders[st.activeShop]||[]}
+function curDesigned(){return st.designed[st.activeShop]||{}}
+function curNotes(){return st.notes[st.activeShop]||{}}
+
+function gF(){let o=[...curOrders()];const des=curDesigned();if(st.filter==='pending')o=o.filter(x=>!des[x.id]);else if(st.filter==='designed')o=o.filter(x=>des[x.id]);if(st.dateFrom){const d=new Date(st.dateFrom);d.setHours(0,0,0,0);o=o.filter(x=>new Date(x.created_at)>=d)}if(st.dateTo){const d=new Date(st.dateTo);d.setHours(23,59,59,999);o=o.filter(x=>new Date(x.created_at)<=d)}if(st.search.trim()){const q=st.search.toLowerCase();o=o.filter(x=>x.name.toLowerCase().includes(q)||x.line_items.some(i=>(i.title||'').toLowerCase().includes(q)||(i.variant_title||'').toLowerCase().includes(q)||(i.properties||[]).some(p=>(p.value||'').toLowerCase().includes(q))))}o.sort((a,b)=>st.sort==='oldest'?new Date(a.created_at)-new Date(b.created_at):new Date(b.created_at)-new Date(a.created_at));return o}
+function dS(){const s={};st.shops.forEach(sh=>{const des=st.designed[sh.id]||{};Object.values(des).forEach(d=>{if(d?.by)s[d.by]=(s[d.by]||0)+1})});return s}
+
 const hdrs=()=>({'Content-Type':'application/json','X-Auth-Token':st.token});
 async function aL(pw){const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});if(!r.ok)throw new Error;return r.json()}
-async function aO(){const r=await fetch('/api/orders',{headers:hdrs()});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
-async function fetchStatus(){try{const r=await fetch('/api/status',{headers:hdrs()});if(r.ok){const d=await r.json();st.designed=d.designed||{};st.notes=d.notes||{}}}catch(e){console.error('Status fetch error:',e)}}
-async function apiMark(orderId){st.saving[orderId]=true;render();try{const r=await fetch('/api/status',{method:'POST',headers:hdrs(),body:JSON.stringify({action:'mark',orderId:String(orderId)})});if(r.ok){const d=await r.json();st.designed=d.designed||st.designed}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
-async function apiUnmark(orderId){st.saving[orderId]=true;render();try{const r=await fetch('/api/status',{method:'POST',headers:hdrs(),body:JSON.stringify({action:'unmark',orderId:String(orderId)})});if(r.ok){const d=await r.json();st.designed=d.designed||st.designed}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
-async function apiNote(orderId,note){try{await fetch('/api/status',{method:'POST',headers:hdrs(),body:JSON.stringify({action:'note',orderId:String(orderId),note})})}catch(e){console.error(e)}}
-
-function tD(id,e){if(e){e.stopPropagation();e.preventDefault()}if(st.saving[id])return;st.designed[id]?apiUnmark(id):apiMark(id)}
+async function fetchOrders(shopId){const r=await fetch(`/api/orders?shop=${shopId}`,{headers:hdrs()});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
+async function fetchStatus(shopId){try{const r=await fetch(`/api/status?shop=${shopId}`,{headers:hdrs()});if(r.ok){const d=await r.json();st.designed[shopId]=d.designed||{};st.notes[shopId]=d.notes||{}}}catch(e){console.error(e)}}
+async function apiMark(orderId){const sid=st.activeShop;st.saving[orderId]=true;render();try{const r=await fetch(`/api/status?shop=${sid}`,{method:'POST',headers:hdrs(),body:JSON.stringify({action:'mark',orderId:String(orderId),shopId:sid})});if(r.ok){const d=await r.json();st.designed[sid]=d.designed||st.designed[sid]||{}}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
+async function apiUnmark(orderId){const sid=st.activeShop;st.saving[orderId]=true;render();try{const r=await fetch(`/api/status?shop=${sid}`,{method:'POST',headers:hdrs(),body:JSON.stringify({action:'unmark',orderId:String(orderId),shopId:sid})});if(r.ok){const d=await r.json();st.designed[sid]=d.designed||st.designed[sid]||{}}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
+async function apiNote(orderId,note){const sid=st.activeShop;try{await fetch(`/api/status?shop=${sid}`,{method:'POST',headers:hdrs(),body:JSON.stringify({action:'note',orderId:String(orderId),note,shopId:sid})})}catch(e){console.error(e)}}
+function tD(id,e){if(e){e.stopPropagation();e.preventDefault()}if(st.saving[id])return;const des=curDesigned();des[id]?apiUnmark(id):apiMark(id)}
 function toggleTheme(){st.theme=st.theme==='dark'?'light':'dark';LS.w('dp_th',st.theme);document.documentElement.setAttribute('data-theme',st.theme);render()}
 
 function render(){
@@ -165,17 +179,21 @@ if(st.screen==='loading'){app.innerHTML=`<div class="loading-state"><div class="
 if(st.screen==='login'){
   app.innerHTML=`<div class="login-overlay"><div class="login-modal"><div class="login-logo">⬡ Studio</div><div class="login-sub">${t('portal')}</div><div class="login-field"><label>${t('password')}</label><input type="password" id="lp" placeholder="${t('password')}" autofocus></div><button class="login-btn" id="lb">${t('login')}</button><div class="login-err">${st.loginError}</div><div class="login-lang"><button class="lang-btn" id="ll">${st.lang==='es'?'EN':'ES'}</button><button class="theme-btn" id="lth">${thI}</button></div></div></div>`;
   const lb=document.getElementById('lb'),lp=document.getElementById('lp');
-  async function go(){if(!lp.value.trim())return;lb.disabled=true;lb.textContent='...';try{const d=await aL(lp.value.trim());LS.w('dp_t',d.token);LS.s('dp_u',{name:d.name,role:d.role});st.token=d.token;st.user={name:d.name,role:d.role};st.loginError='';st.screen='dashboard';render();load()}catch{st.loginError=t('loginError');render()}}
+  async function go(){if(!lp.value.trim())return;lb.disabled=true;lb.textContent='...';try{const d=await aL(lp.value.trim());LS.w('dp_t',d.token);LS.s('dp_u',{name:d.name,role:d.role});LS.s('dp_shops',d.shops);st.token=d.token;st.user={name:d.name,role:d.role};st.shops=d.shops||[];st.activeShop=st.shops[0]?.id||null;st.loginError='';st.screen='dashboard';render();loadShop()}catch{st.loginError=t('loginError');render()}}
   lb.onclick=go;lp.onkeydown=e=>{if(e.key==='Enter')go()};
   document.getElementById('ll').onclick=()=>{st.lang=st.lang==='es'?'en':'es';LS.w('dp_l',st.lang);render()};
   document.getElementById('lth').onclick=toggleTheme;return}
 
-const f=gF(),pc=st.orders.filter(o=>!st.designed[o.id]).length,dc=st.orders.filter(o=>st.designed[o.id]).length,isA=st.user?.role==='admin';
+const des=curDesigned(),orders=curOrders(),f=gF();
+const pc=orders.filter(o=>!des[o.id]).length,dc=orders.filter(o=>des[o.id]).length,isA=st.user?.role==='admin';
 const td=new Date().toISOString().slice(0,10),wa=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+const shopName=st.shops.find(s=>s.id===st.activeShop)?.name||'';
+
 app.innerHTML=`
 <div class="header"><div class="header-left"><div class="logo">⬡ Studio</div><div class="logo-divider"></div><div class="header-subtitle">${t('portal')}</div></div><div class="header-right"><div class="sync-indicator ${isSyncing?'syncing':''}"><div class="sync-dot"></div>${isSyncing?t('syncing'):t('connected')}</div><span class="user-badge ${isA?'admin':''}">${st.user?.name||''}</span><button class="theme-btn" id="thm">${thI}</button><button class="lang-btn" id="lt">${st.lang==='es'?'EN':'ES'}</button><button class="btn-s" id="lo">${t('logout')}</button></div></div>
+${st.shops.length>1?`<div class="shop-tabs">${st.shops.map(s=>{const sOrders=st.orders[s.id]||[];const sDes=st.designed[s.id]||{};const sPending=sOrders.filter(o=>!sDes[o.id]).length;return`<button class="shop-tab ${s.id===st.activeShop?'active':''}" data-shop="${s.id}">${s.name}<span class="shop-tab-count">${sPending}</span></button>`}).join('')}</div>`:''}
 <div class="toolbar">
-  <div class="tb-group"><button class="tb-btn ${st.filter==='all'?'active':''}" data-f="all">${t('all')} <span class="tb-count">${st.orders.length}</span></button><button class="tb-btn ${st.filter==='pending'?'active':''}" data-f="pending">${t('pendingF')} <span class="tb-count">${pc}</span></button><button class="tb-btn ${st.filter==='designed'?'active':''}" data-f="designed">${t('designedF')} <span class="tb-count">${dc}</span></button></div>
+  <div class="tb-group"><button class="tb-btn ${st.filter==='all'?'active':''}" data-f="all">${t('all')} <span class="tb-count">${orders.length}</span></button><button class="tb-btn ${st.filter==='pending'?'active':''}" data-f="pending">${t('pendingF')} <span class="tb-count">${pc}</span></button><button class="tb-btn ${st.filter==='designed'?'active':''}" data-f="designed">${t('designedF')} <span class="tb-count">${dc}</span></button></div>
   <div class="tb-sep"></div>
   <div class="tb-group"><select class="tb-select" id="srt"><option value="newest" ${st.sort==='newest'?'selected':''}>${t('newest')}</option><option value="oldest" ${st.sort==='oldest'?'selected':''}>${t('oldest')}</option></select></div>
   <div class="tb-sep"></div>
@@ -186,19 +204,20 @@ app.innerHTML=`
 <div class="content">
   ${st.error?`<div class="error-banner">⚠️ ${st.error}</div>`:''}
   ${isA?rA():''}
-  <div class="stats"><div class="stat"><span class="stat-label">${t('pendingL')}</span><span class="stat-val p">${pc}</span></div><div class="stat"><span class="stat-label">${t('designedL')}</span><span class="stat-val d">${dc}</span></div><div class="stat"><span class="stat-label">${t('totalS')}</span><span class="stat-val">${st.orders.reduce((s,o)=>s+o.line_items.reduce((ss,i)=>ss+i.quantity,0),0)}</span></div></div>
+  <div class="stats"><div class="stat"><span class="stat-label">${t('pendingL')}</span><span class="stat-val p">${pc}</span></div><div class="stat"><span class="stat-label">${t('designedL')}</span><span class="stat-val d">${dc}</span></div><div class="stat"><span class="stat-label">${t('totalS')}</span><span class="stat-val">${orders.reduce((s,o)=>s+o.line_items.reduce((ss,i)=>ss+i.quantity,0),0)}</span></div></div>
   ${st.loading?`<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">${t('loading')}</div></div>`:''}
   ${!st.loading&&f.length===0?`<div class="empty-state"><div class="empty-state-icon">${st.filter==='pending'?'🎉':'📭'}</div><p>${{all:t('eAll'),pending:t('ePending'),designed:t('eDesigned')}[st.filter]}</p></div>`:''}
   ${!st.loading&&f.length>0?`<div class="list-header"><span></span><span>${t('orderN')}</span><span>${t('date')}</span><span>${t('items')}</span><span>${t('status')}</span><span></span></div>${f.map(rR).join('')}`:''}
 </div>
 ${st.modal?rM():''}`;
-bind(td,wa)}
+bindAll(td,wa)}
 
-function rR(o){const d=st.designed[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o),sv=st.saving[o.id];return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''} ${sv?'saving':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
-function rM(){const o=st.modal;if(!o)return'';const d=st.designed[o.id],dn=!!d,n=st.notes[o.id],nt=n?n.text||'':'',sv=st.saving[o.id];return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span></div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${nt.replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb" ${sv?'disabled':''}>${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
+function rR(o){const des=curDesigned(),d=des[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o),sv=st.saving[o.id];return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''} ${sv?'saving':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
+function rM(){const o=st.modal;if(!o)return'';const des=curDesigned(),d=des[o.id],dn=!!d,ns=curNotes(),n=ns[o.id],nt=n?n.text||'':'',sv=st.saving[o.id];const shopName=st.shops.find(s=>s.id===st.activeShop)?.name||'';return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span>${st.shops.length>1?`<span class="modal-shop-badge">${shopName}</span>`:''}</div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${nt.replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb" ${sv?'disabled':''}>${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
 function rA(){const s=dS();return`<div class="admin-bar"><span class="admin-bar-title">${t('admin')}</span>${Object.entries(s).map(([n,c])=>`<span class="admin-chip"><span class="admin-chip-name">${n}</span><span class="admin-chip-count">${c}</span></span>`).join('')}<span class="admin-help">${t('adminInfo')} <code>DESIGNER_USERS</code></span></div>`}
 
-function bind(td,wa){
+function bindAll(td,wa){
+  document.querySelectorAll('[data-shop]').forEach(b=>b.onclick=()=>{if(b.dataset.shop!==st.activeShop){st.activeShop=b.dataset.shop;st.filter='all';st.search='';st.modal=null;render();if(!st.orders[st.activeShop])loadShop()}});
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{st.filter=b.dataset.f;render()});
   document.getElementById('srt').onchange=e=>{st.sort=e.target.value;render()};
   document.getElementById('df').onchange=e=>{st.dateFrom=e.target.value;render()};
@@ -207,12 +226,12 @@ function bind(td,wa){
   document.getElementById('dtw')?.addEventListener('click',()=>{st.dateFrom=wa;st.dateTo=td;render()});
   document.getElementById('dtc')?.addEventListener('click',()=>{st.dateFrom='';st.dateTo='';render()});
   const si=document.getElementById('si');if(si){si.oninput=()=>{st.search=si.value;render();const el=document.getElementById('si');if(el){el.focus();el.selectionStart=el.selectionEnd=el.value.length}}}
-  document.getElementById('rf').onclick=load;
-  document.getElementById('lo').onclick=()=>{LS.d('dp_t');LS.d('dp_u');st.token=null;st.user=null;st.orders=[];st.screen='login';render()};
+  document.getElementById('rf').onclick=()=>loadShop();
+  document.getElementById('lo').onclick=()=>{LS.d('dp_t');LS.d('dp_u');LS.d('dp_shops');st.token=null;st.user=null;st.orders={};st.designed={};st.notes={};st.shops=[];st.screen='login';render()};
   document.getElementById('lt').onclick=()=>{st.lang=st.lang==='es'?'en':'es';LS.w('dp_l',st.lang);render()};
   document.getElementById('thm')?.addEventListener('click',toggleTheme);
   document.querySelectorAll('[data-chk]').forEach(el=>el.onclick=e=>tD(el.dataset.chk,e));
-  document.querySelectorAll('[data-oid]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-chk]'))return;st.modal=st.orders.find(o=>String(o.id)===el.dataset.oid);render()});
+  document.querySelectorAll('[data-oid]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-chk]'))return;st.modal=curOrders().find(o=>String(o.id)===el.dataset.oid);render()});
   document.getElementById('mo')?.addEventListener('click',e=>{if(e.target.id==='mo'){st.modal=null;render()}});
   document.getElementById('mc')?.addEventListener('click',()=>{st.modal=null;render()});
   document.getElementById('mb')?.addEventListener('click',()=>{if(st.modal)tD(st.modal.id)});
@@ -220,11 +239,12 @@ function bind(td,wa){
   document.onkeydown=e=>{if(e.key==='Escape'&&st.modal){st.modal=null;render()}};
 }
 
-async function load(){
+async function loadShop(){
+  if(!st.activeShop)return;
   st.loading=true;st.error=null;render();
   try{
-    const [orders]=await Promise.all([aO(),fetchStatus()]);
-    st.orders=orders;st.loading=false;
+    const [orders]=await Promise.all([fetchOrders(st.activeShop),fetchStatus(st.activeShop)]);
+    st.orders[st.activeShop]=orders;st.loading=false;
   }catch(e){
     if(e.message==='UNAUTHORIZED'){st.screen='login';st.loginError=t('sessionExpired')}
     else st.error=e.message;
@@ -233,12 +253,23 @@ async function load(){
   render();
 }
 
-// Auto-refresh every 30s (more frequent since shared)
-setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading){fetchStatus().then(render)}},30000);
-// Full reload every 2 min
-setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading)load()},120000);
+async function loadAllStatuses(){
+  for(const s of st.shops){await fetchStatus(s.id)}
+  render();
+}
 
-if(st.token&&st.user){st.screen='dashboard';render();load()}else{st.screen='login';render()}
+setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading&&st.activeShop)fetchStatus(st.activeShop).then(render)},30000);
+setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading)loadShop()},120000);
+
+if(st.token&&st.user){
+  st.shops=LS.g('dp_shops',[]);
+  st.activeShop=st.shops[0]?.id||null;
+  st.screen='dashboard';render();
+  loadShop().then(()=>{
+    // Load statuses for other shops in background (for tab counts)
+    st.shops.filter(s=>s.id!==st.activeShop).forEach(s=>fetchOrders(s.id).then(o=>{st.orders[s.id]=o;fetchStatus(s.id).then(render)}));
+  });
+}else{st.screen='login';render()}
 })();
 </script>
 </body>

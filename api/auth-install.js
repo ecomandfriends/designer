@@ -1,13 +1,22 @@
+const { getShops } = require('./_helpers');
+
 module.exports = (req, res) => {
-  const SHOP = process.env.SHOPIFY_SHOP;
+  const shopId = req.query.shop;
+  const shops = getShops();
+  const shop = shops.find(s => s.id === shopId);
+
+  if (!shop) {
+    const list = shops.map(s => `<li><a href="/api/auth-install?shop=${s.id}">${s.name} (${s.shop})</a></li>`).join('');
+    return res.setHeader('Content-Type', 'text/html').send(`
+      <h2>Select a shop to authorize:</h2><ul>${list}</ul>
+    `);
+  }
+
   const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
   const APP_URL = process.env.APP_URL;
-
   const redirectUri = `${APP_URL}/api/auth-callback`;
   const scopes = 'read_orders';
   const nonce = Math.random().toString(36).substring(2, 18);
-
-  const authUrl = `https://${SHOP}/admin/oauth/authorize?client_id=${CLIENT_ID}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${nonce}`;
-
+  const authUrl = `https://${shop.shop}/admin/oauth/authorize?client_id=${CLIENT_ID}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${nonce}`;
   res.redirect(302, authUrl);
 };
