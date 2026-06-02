@@ -12,9 +12,13 @@ module.exports = async (req, res) => {
   const shop = shops.find(s => s.id === shopId);
   if (!shop) return res.status(404).json({ error: 'Shop not found' });
 
+  const showAll = req.query.show === 'all';
+
   try {
     let allOrders = [];
-    let url = `https://${shop.shop}/admin/api/2024-01/orders.json?status=any&fulfillment_status=unfulfilled&limit=250`;
+    let baseUrl = `https://${shop.shop}/admin/api/2024-01/orders.json?status=any&limit=250`;
+    if (!showAll) baseUrl += '&fulfillment_status=unfulfilled';
+    let url = baseUrl;
 
     while (url) {
       const response = await fetch(url, {
@@ -27,6 +31,10 @@ module.exports = async (req, res) => {
       }
       const data = await response.json();
       allOrders = allOrders.concat(data.orders || []);
+
+      // For "all" mode, limit to 250 most recent to avoid timeout
+      if (showAll && allOrders.length >= 250) break;
+
       const linkHeader = response.headers.get('link');
       url = null;
       if (linkHeader) { const m = linkHeader.match(/<([^>]+)>;\s*rel="next"/); if (m) url = m[1]; }

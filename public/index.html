@@ -7,8 +7,8 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        [data-theme="dark"]{--bg:#0a0a0a;--surface:#141414;--border:#222;--border-light:#333;--text:#e8e8e8;--text-muted:#888;--text-dim:#555;--accent:#f5c542;--accent-dim:#f5c54222;--green:#34d399;--green-dim:#34d39918;--orange:#fb923c;--orange-dim:#fb923c18;--red:#f87171;--blue:#60a5fa;--blue-dim:#60a5fa18;--header-bg:rgba(10,10,10,.9);--modal-bg:rgba(0,0,0,.65);--input-bg:transparent;--select-bg:#0a0a0a;--scheme:dark}
-        [data-theme="light"]{--bg:#f5f5f5;--surface:#ffffff;--border:#e0e0e0;--border-light:#ccc;--text:#1a1a1a;--text-muted:#666;--text-dim:#999;--accent:#c9960c;--accent-dim:#c9960c15;--green:#16a34a;--green-dim:#16a34a12;--orange:#ea580c;--orange-dim:#ea580c12;--red:#dc2626;--blue:#2563eb;--blue-dim:#2563eb12;--header-bg:rgba(245,245,245,.92);--modal-bg:rgba(0,0,0,.35);--input-bg:#fff;--select-bg:#fff;--scheme:light}
+        [data-theme="dark"]{--bg:#0a0a0a;--surface:#141414;--border:#222;--border-light:#333;--text:#e8e8e8;--text-muted:#888;--text-dim:#555;--accent:#f5c542;--accent-dim:#f5c54222;--green:#34d399;--green-dim:#34d39918;--orange:#fb923c;--orange-dim:#fb923c18;--red:#f87171;--blue:#60a5fa;--blue-dim:#60a5fa18;--purple:#a78bfa;--purple-dim:#a78bfa18;--header-bg:rgba(10,10,10,.9);--modal-bg:rgba(0,0,0,.65);--input-bg:transparent;--select-bg:#0a0a0a;--scheme:dark}
+        [data-theme="light"]{--bg:#f5f5f5;--surface:#ffffff;--border:#e0e0e0;--border-light:#ccc;--text:#1a1a1a;--text-muted:#666;--text-dim:#999;--accent:#c9960c;--accent-dim:#c9960c15;--green:#16a34a;--green-dim:#16a34a12;--orange:#ea580c;--orange-dim:#ea580c12;--red:#dc2626;--blue:#2563eb;--blue-dim:#2563eb12;--purple:#7c3aed;--purple-dim:#7c3aed12;--header-bg:rgba(245,245,245,.92);--modal-bg:rgba(0,0,0,.35);--input-bg:#fff;--select-bg:#fff;--scheme:light}
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
         .header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--header-bg);z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
@@ -26,21 +26,19 @@
         .sync-indicator{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px}
         .sync-indicator.syncing{color:var(--orange)}
         .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-
-        /* SHOP TABS */
         .shop-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 28px;gap:0}
-        .shop-tab{font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;padding:12px 24px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;position:relative}
+        .shop-tab{font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;padding:12px 24px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
         .shop-tab:hover{color:var(--text)}
         .shop-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
         .shop-tab-count{font-family:'Space Mono',monospace;font-size:10px;background:var(--border);padding:1px 5px;border-radius:3px;margin-left:6px}
         .shop-tab.active .shop-tab-count{background:var(--accent);color:#fff}
         [data-theme="dark"] .shop-tab.active .shop-tab-count{color:var(--bg)}
-
         .toolbar{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
         .tb-group{display:flex;gap:4px;align-items:center}
         .tb-btn{font-family:'Poppins',sans-serif;font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;font-weight:500}
         .tb-btn:hover{border-color:var(--border-light);color:var(--text)}
         .tb-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+        .tb-btn.purple{background:var(--purple-dim);border-color:var(--purple);color:var(--purple)}
         .tb-count{font-family:'Space Mono',monospace;font-size:10px;background:var(--border);padding:1px 5px;border-radius:3px}
         .tb-btn.active .tb-count{background:var(--accent);color:#fff}
         [data-theme="dark"] .tb-btn.active .tb-count{color:var(--bg)}
@@ -61,6 +59,8 @@
         .order-row:hover{background:var(--surface)}
         .order-row.designed-row{opacity:.45}
         .order-row.designed-row:hover{opacity:.7}
+        .order-row.fulfilled-row{opacity:.35}
+        .order-row.fulfilled-row:hover{opacity:.6}
         .row-check{width:28px;height:28px;border-radius:7px;border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:14px}
         .row-check:hover{border-color:var(--accent);background:var(--accent-dim)}
         .row-check.checked{border-color:var(--green);background:var(--green-dim);color:var(--green)}
@@ -72,6 +72,7 @@
         .row-status{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:4px 10px;border-radius:5px;text-align:center;white-space:nowrap}
         .row-status.pending{background:var(--orange-dim);color:var(--orange)}
         .row-status.done{background:var(--green-dim);color:var(--green)}
+        .row-status.fulfilled{background:var(--purple-dim);color:var(--purple)}
         .row-by{font-size:9px;color:var(--text-dim);margin-top:2px;text-align:center}
         .row-open{font-size:16px;color:var(--text-dim);transition:color .15s}
         .order-row:hover .row-open{color:var(--accent)}
@@ -80,10 +81,11 @@
         .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:560px;max-width:92vw;max-height:85vh;overflow:auto;animation:slideUp .2s ease}
         @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         .modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
-        .modal-head-left{display:flex;align-items:center;gap:12px}
+        .modal-head-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
         .modal-order-num{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent)}
         .modal-date{font-size:12px;color:var(--text-dim)}
         .modal-shop-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue);font-weight:500}
+        .modal-fulfillment{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple);font-weight:500}
         .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
         .modal-close:hover{border-color:var(--red);color:var(--red)}
         .modal-body{padding:20px 24px}
@@ -142,10 +144,10 @@
 <div id="app"></div>
 <script>
 (()=>{
-const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Synced',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No unfulfilled orders',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week',syncing:'Syncing...'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Sincronizado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana',syncing:'Sincronizando...'}};
+const T={en:{portal:'Design Portal',password:'Password',login:'Log in',loginError:'Incorrect password',sessionExpired:'Session expired.',connected:'Synced',logout:'Log out',all:'All',pendingF:'Pending',designedF:'Designed',search:'Search...',pendingL:'Pending',designedL:'Designed',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pending',sDone:'Designed',sFulfilled:'Fulfilled',markDone:'✓ Mark designed',markUndone:'Unmark',notes:'Notes...',loading:'Loading orders...',connecting:'Connecting...',eAll:'No orders found',ePending:'All done! 🎉',eDesigned:'Nothing marked yet',by:'by',admin:'⚙ Designers',adminInfo:'Edit in Vercel:',orderN:'Order',date:'Date',items:'Items',status:'Status',oldest:'Oldest first',newest:'Newest first',today:'Today',week:'This week',syncing:'Syncing...',showAll:'All orders',showUnfulfilled:'Unfulfilled only'},es:{portal:'Portal de Diseño',password:'Contraseña',login:'Entrar',loginError:'Contraseña incorrecta',sessionExpired:'Sesión expirada.',connected:'Sincronizado',logout:'Cerrar sesión',all:'Todos',pendingF:'Pendientes',designedF:'Diseñados',search:'Buscar...',pendingL:'Pendientes',designedL:'Diseñados',totalS:'Stickers',sticker:'sticker',stickers:'stickers',sPending:'Pendiente',sDone:'Diseñado',sFulfilled:'Enviado',markDone:'✓ Marcar diseñado',markUndone:'Desmarcar',notes:'Notas...',loading:'Cargando pedidos...',connecting:'Conectando...',eAll:'No hay pedidos',ePending:'¡Todo hecho! 🎉',eDesigned:'Nada marcado aún',by:'por',admin:'⚙ Diseñadores',adminInfo:'Editar en Vercel:',orderN:'Pedido',date:'Fecha',items:'Items',status:'Estado',oldest:'Más antiguo',newest:'Más reciente',today:'Hoy',week:'Esta semana',syncing:'Sincronizando...',showAll:'Todos los pedidos',showUnfulfilled:'Solo sin preparar'}};
 const LS={g:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}},s:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),d:k=>localStorage.removeItem(k),r:k=>localStorage.getItem(k),w:(k,v)=>localStorage.setItem(k,v)};
 
-const st={screen:'loading',shops:[],activeShop:null,orders:{},designed:{},notes:{},loading:false,error:null,filter:'all',search:'',token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:'',saving:{}};
+const st={screen:'loading',shops:[],activeShop:null,orders:{},designed:{},notes:{},loading:false,error:null,filter:'all',search:'',token:LS.r('dp_t'),user:LS.g('dp_u',null),lang:LS.r('dp_l')||(navigator.language.startsWith('es')?'es':'en'),theme:LS.r('dp_th')||'dark',loginError:'',modal:null,sort:'newest',dateFrom:'',dateTo:'',saving:{},showAll:false};
 document.documentElement.setAttribute('data-theme',st.theme);
 const t=k=>T[st.lang][k]||k;
 const fmtD=iso=>new Date(iso).toLocaleDateString(st.lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short'});
@@ -163,7 +165,7 @@ function dS(){const s={};st.shops.forEach(sh=>{const des=st.designed[sh.id]||{};
 
 const hdrs=()=>({'Content-Type':'application/json','X-Auth-Token':st.token});
 async function aL(pw){const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});if(!r.ok)throw new Error;return r.json()}
-async function fetchOrders(shopId){const r=await fetch(`/api/orders?shop=${shopId}`,{headers:hdrs()});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
+async function fetchOrders(shopId){const showParam=st.showAll?'&show=all':'';const r=await fetch(`/api/orders?shop=${shopId}${showParam}`,{headers:hdrs()});if(r.status===401){LS.d('dp_t');LS.d('dp_u');throw new Error('UNAUTHORIZED')}if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
 async function fetchStatus(shopId){try{const r=await fetch(`/api/status?shop=${shopId}`,{headers:hdrs()});if(r.ok){const d=await r.json();st.designed[shopId]=d.designed||{};st.notes[shopId]=d.notes||{}}}catch(e){console.error(e)}}
 async function apiMark(orderId){const sid=st.activeShop;st.saving[orderId]=true;render();try{const r=await fetch(`/api/status?shop=${sid}`,{method:'POST',headers:hdrs(),body:JSON.stringify({action:'mark',orderId:String(orderId),shopId:sid})});if(r.ok){const d=await r.json();st.designed[sid]=d.designed||st.designed[sid]||{}}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
 async function apiUnmark(orderId){const sid=st.activeShop;st.saving[orderId]=true;render();try{const r=await fetch(`/api/status?shop=${sid}`,{method:'POST',headers:hdrs(),body:JSON.stringify({action:'unmark',orderId:String(orderId),shopId:sid})});if(r.ok){const d=await r.json();st.designed[sid]=d.designed||st.designed[sid]||{}}}catch(e){console.error(e)}st.saving[orderId]=false;render()}
@@ -187,13 +189,14 @@ if(st.screen==='login'){
 const des=curDesigned(),orders=curOrders(),f=gF();
 const pc=orders.filter(o=>!des[o.id]).length,dc=orders.filter(o=>des[o.id]).length,isA=st.user?.role==='admin';
 const td=new Date().toISOString().slice(0,10),wa=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
-const shopName=st.shops.find(s=>s.id===st.activeShop)?.name||'';
 
 app.innerHTML=`
 <div class="header"><div class="header-left"><div class="logo">⬡ Studio</div><div class="logo-divider"></div><div class="header-subtitle">${t('portal')}</div></div><div class="header-right"><div class="sync-indicator ${isSyncing?'syncing':''}"><div class="sync-dot"></div>${isSyncing?t('syncing'):t('connected')}</div><span class="user-badge ${isA?'admin':''}">${st.user?.name||''}</span><button class="theme-btn" id="thm">${thI}</button><button class="lang-btn" id="lt">${st.lang==='es'?'EN':'ES'}</button><button class="btn-s" id="lo">${t('logout')}</button></div></div>
 ${st.shops.length>1?`<div class="shop-tabs">${st.shops.map(s=>{const sOrders=st.orders[s.id]||[];const sDes=st.designed[s.id]||{};const sPending=sOrders.filter(o=>!sDes[o.id]).length;return`<button class="shop-tab ${s.id===st.activeShop?'active':''}" data-shop="${s.id}">${s.name}<span class="shop-tab-count">${sPending}</span></button>`}).join('')}</div>`:''}
 <div class="toolbar">
   <div class="tb-group"><button class="tb-btn ${st.filter==='all'?'active':''}" data-f="all">${t('all')} <span class="tb-count">${orders.length}</span></button><button class="tb-btn ${st.filter==='pending'?'active':''}" data-f="pending">${t('pendingF')} <span class="tb-count">${pc}</span></button><button class="tb-btn ${st.filter==='designed'?'active':''}" data-f="designed">${t('designedF')} <span class="tb-count">${dc}</span></button></div>
+  <div class="tb-sep"></div>
+  <div class="tb-group"><button class="tb-btn ${st.showAll?'purple':''}" id="toggleAll">${st.showAll?t('showAll'):t('showUnfulfilled')}</button></div>
   <div class="tb-sep"></div>
   <div class="tb-group"><select class="tb-select" id="srt"><option value="newest" ${st.sort==='newest'?'selected':''}>${t('newest')}</option><option value="oldest" ${st.sort==='oldest'?'selected':''}>${t('oldest')}</option></select></div>
   <div class="tb-sep"></div>
@@ -212,13 +215,14 @@ ${st.shops.length>1?`<div class="shop-tabs">${st.shops.map(s=>{const sOrders=st.
 ${st.modal?rM():''}`;
 bindAll(td,wa)}
 
-function rR(o){const des=curDesigned(),d=des[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o),sv=st.saving[o.id];return`<div class="order-row ${dn?'designed-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''} ${sv?'saving':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${dn?'done':'pending'}">${dn?t('sDone'):t('sPending')}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
-function rM(){const o=st.modal;if(!o)return'';const des=curDesigned(),d=des[o.id],dn=!!d,ns=curNotes(),n=ns[o.id],nt=n?n.text||'':'',sv=st.saving[o.id];const shopName=st.shops.find(s=>s.id===st.activeShop)?.name||'';return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span>${st.shops.length>1?`<span class="modal-shop-badge">${shopName}</span>`:''}</div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${nt.replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb" ${sv?'disabled':''}>${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
+function rR(o){const des=curDesigned(),d=des[o.id],dn=!!d,q=o.line_items.reduce((s,i)=>s+i.quantity,0),sm=iSum(o),sv=st.saving[o.id];const isFulfilled=o.fulfillment_status==='fulfilled';let statusClass='pending',statusText=t('sPending');if(dn){statusClass='done';statusText=t('sDone')}else if(isFulfilled){statusClass='fulfilled';statusText=t('sFulfilled')}return`<div class="order-row ${dn?'designed-row':''} ${isFulfilled&&!dn?'fulfilled-row':''}" data-oid="${o.id}"><div class="row-check ${dn?'checked':''} ${sv?'saving':''}" data-chk="${o.id}">${dn?'✓':''}</div><div><div class="row-order">${o.name}</div><div class="row-items">${sm||'—'}</div></div><div class="row-date">${fmtD(o.created_at)}</div><div class="row-count">${q} ${q>1?t('stickers'):t('sticker')}</div><div><div class="row-status ${statusClass}">${statusText}</div>${dn&&d.by?`<div class="row-by">${d.by}</div>`:''}</div><div class="row-open">→</div></div>`}
+function rM(){const o=st.modal;if(!o)return'';const des=curDesigned(),d=des[o.id],dn=!!d,ns=curNotes(),n=ns[o.id],nt=n?n.text||'':'',sv=st.saving[o.id];const shopName=st.shops.find(s=>s.id===st.activeShop)?.name||'';const isFulfilled=o.fulfillment_status==='fulfilled';return`<div class="modal-overlay" id="mo"><div class="modal"><div class="modal-head"><div class="modal-head-left"><span class="modal-order-num">${o.name}</span><span class="modal-date">${fmtDT(o.created_at)}</span>${st.shops.length>1?`<span class="modal-shop-badge">${shopName}</span>`:''}${isFulfilled?`<span class="modal-fulfillment">${t('sFulfilled')}</span>`:''}</div><button class="modal-close" id="mc">✕</button></div><div class="modal-body">${o.line_items.map(i=>`<div class="modal-item"><div class="mi-icon">${gI(i)}</div><div class="mi-info"><div class="mi-title">${i.title}</div>${i.variant_title?`<div class="mi-variant">${i.variant_title}</div>`:''}<div class="mi-props">${(i.properties||[]).filter(p=>p.name&&p.value&&!p.name.startsWith('_')).map(p=>`<div class="mi-prop"><span class="mi-prop-l">${p.name}:</span><span class="mi-prop-v">${p.value}</span></div>`).join('')}</div></div><div class="mi-qty">×${i.quantity}</div></div>`).join('')}</div><div class="modal-foot"><input class="modal-notes" type="text" placeholder="${t('notes')}" value="${nt.replace(/"/g,'&quot;')}" id="mn"><button class="modal-btn ${dn?'undone':'done'}" id="mb" ${sv?'disabled':''}>${dn?t('markUndone'):t('markDone')}</button></div></div></div>`}
 function rA(){const s=dS();return`<div class="admin-bar"><span class="admin-bar-title">${t('admin')}</span>${Object.entries(s).map(([n,c])=>`<span class="admin-chip"><span class="admin-chip-name">${n}</span><span class="admin-chip-count">${c}</span></span>`).join('')}<span class="admin-help">${t('adminInfo')} <code>DESIGNER_USERS</code></span></div>`}
 
 function bindAll(td,wa){
   document.querySelectorAll('[data-shop]').forEach(b=>b.onclick=()=>{if(b.dataset.shop!==st.activeShop){st.activeShop=b.dataset.shop;st.filter='all';st.search='';st.modal=null;render();if(!st.orders[st.activeShop])loadShop()}});
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{st.filter=b.dataset.f;render()});
+  document.getElementById('toggleAll')?.addEventListener('click',()=>{st.showAll=!st.showAll;loadShop()});
   document.getElementById('srt').onchange=e=>{st.sort=e.target.value;render()};
   document.getElementById('df').onchange=e=>{st.dateFrom=e.target.value;render()};
   document.getElementById('dt2').onchange=e=>{st.dateTo=e.target.value;render()};
@@ -253,11 +257,6 @@ async function loadShop(){
   render();
 }
 
-async function loadAllStatuses(){
-  for(const s of st.shops){await fetchStatus(s.id)}
-  render();
-}
-
 setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading&&st.activeShop)fetchStatus(st.activeShop).then(render)},30000);
 setInterval(()=>{if(st.screen==='dashboard'&&st.token&&!st.loading)loadShop()},120000);
 
@@ -266,7 +265,6 @@ if(st.token&&st.user){
   st.activeShop=st.shops[0]?.id||null;
   st.screen='dashboard';render();
   loadShop().then(()=>{
-    // Load statuses for other shops in background (for tab counts)
     st.shops.filter(s=>s.id!==st.activeShop).forEach(s=>fetchOrders(s.id).then(o=>{st.orders[s.id]=o;fetchStatus(s.id).then(render)}));
   });
 }else{st.screen='login';render()}
