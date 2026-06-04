@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticker Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Teko:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:#f7f7f7;color:#1a1a1a;height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#f0f0f0}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+
+/* LOGIN */
+.login{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:200}
+.login-box{width:360px;max-width:90vw;text-align:center}
+.login-logo{font-family:'Teko',sans-serif;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:3px;margin-bottom:4px}
+.login-sub{font-size:13px;color:#999;margin-bottom:32px}
+.login-input{font-family:'Poppins',sans-serif;font-size:14px;padding:12px 16px;border-radius:8px;border:1px solid #ddd;width:100%;outline:none}
+.login-input:focus{border-color:#1a1a1a}
+.login-btn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:8px;border:none;background:#1a1a1a;color:#fff;width:100%;cursor:pointer;margin-top:10px}
+.login-btn:hover{background:#333}
+.login-err{font-size:12px;color:#e53e3e;margin-top:8px;min-height:18px}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{padding:12px 20px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;background:#fff;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-family:'Teko',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px}
+.topbar-sep{width:1px;height:18px;background:#ddd}
+.topbar-right{display:flex;gap:8px;align-items:center}
+
+.shop-tabs{display:flex;border-bottom:1px solid #e5e5e5;background:#fff;padding:0 20px;flex-shrink:0}
+.shop-tab{font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;padding:10px 20px;border:none;background:none;color:#999;cursor:pointer;border-bottom:2px solid transparent}
+.shop-tab:hover{color:#1a1a1a}
+.shop-tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:600}
+.shop-tab-count{font-family:'Teko',sans-serif;font-size:12px;background:#e5e5e5;padding:1px 6px;border-radius:3px;margin-left:6px}
+.shop-tab.active .shop-tab-count{background:#1a1a1a;color:#fff}
+
+.main{flex:1;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:300px;border-right:1px solid #e5e5e5;overflow-y:auto;background:#fff;flex-shrink:0}
+.sidebar-header{padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.sidebar-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#999;font-weight:600}
+.sidebar-toggle{font-family:'Poppins',sans-serif;font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer}
+.sidebar-toggle.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.order-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+.order-item:hover{background:#fafafa}
+.order-item.previewing{background:#f5f5f5}
+.order-check{width:20px;height:20px;border-radius:4px;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s}
+.order-check.checked{border-color:#1a1a1a;background:#1a1a1a;color:#fff}
+.order-info{flex:1;min-width:0}
+.order-name{font-family:'Teko',sans-serif;font-size:15px;font-weight:700;color:#1a1a1a}
+.order-meta{font-size:10px;color:#999;margin-top:2px}
+.order-chips{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+.order-chip{font-size:9px;padding:2px 6px;border-radius:3px;background:#f0f0f0;color:#666;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order-dl{width:24px;height:24px;border-radius:5px;border:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:#999;flex-shrink:0}
+.order-dl:hover{border-color:#1a1a1a;color:#1a1a1a}
+
+/* PREVIEW */
+.preview{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:32px;background:#f7f7f7}
+.preview-label{font-size:12px;color:#999;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.preview-label strong{font-family:'Teko',sans-serif;font-size:18px;color:#1a1a1a}
+.preview-canvas-wrap{background:repeating-conic-gradient(#eee 0% 25%, #fff 0% 50%) 50% / 14px 14px;border-radius:10px;padding:20px;border:1px solid #e5e5e5;display:inline-flex}
+.preview-info{margin-top:16px;font-size:11px;color:#bbb;text-align:center;line-height:1.6}
+
+/* BUTTONS */
+.btn{font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;padding:7px 14px;border-radius:6px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;transition:all .15s}
+.btn:hover{border-color:#999;color:#1a1a1a}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:600}
+.btn-primary:hover{background:#333}
+.btn-primary:disabled{background:#ccc;border-color:#ccc;cursor:not-allowed}
+
+.empty-state{text-align:center;padding:60px 32px;color:#ccc}
+.empty-state-icon{font-size:40px;margin-bottom:12px}
+
+.loading{text-align:center;padding:60px;color:#999;font-size:13px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(()=>{
+const FONT='Teko';const FSIZE=80;const M=12;const GAP=10;const BDR=2;const LOGO=90;
+const PRINT_W_CM=55;const DPI=300;const PRINT_W_PX=Math.round(PRINT_W_CM*(DPI/2.54));const ORDER_GAP=80;
+
+const LS={r:k=>localStorage.getItem(k),w:(k,v)=>localStorage.setItem(k,v),g:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}},s:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),d:k=>localStorage.removeItem(k)};
+
+const st={screen:'login',token:LS.r('sg_t'),user:LS.g('sg_u',null),shops:LS.g('sg_shops',[]),activeShop:null,orders:{},selected:new Set(),previewIdx:null,showAll:false,loading:false,error:null};
+
+const flagCache={};
+
+function flagToISO(e){const p=[];for(const c of e){const cp=c.codePointAt(0);if(cp>=0x1f1e6&&cp<=0x1f1ff)p.push(cp)}if(p.length<2)return null;return String.fromCharCode(p[0]-0x1f1e6+65,p[1]-0x1f1e6+65).toLowerCase()}
+function getFlagUrl(e){const iso=flagToISO(e);return iso?`https://flagcdn.com/w320/${iso}.png`:null}
+function loadImg(url){return new Promise((res,rej)=>{const img=new Image();img.crossOrigin='anonymous';img.onload=()=>res(img);img.onerror=()=>rej();img.src=url})}
+
+function parseStickers(order){
+  return order.line_items.filter(li=>{
+    const ps=li.properties||[];
+    return ps.some(p=>p.name==='_sticker'&&p.value==='true');
+  }).map(li=>{
+    const ps=li.properties||[];
+    const tipo=(ps.find(p=>p.name==='Tipo')||{}).value||'';
+    const diseno=(ps.find(p=>p.name==='Diseño'||p.name==='Design')||{}).value||li.variant_title||'';
+    const color=(ps.find(p=>p.name==='Color')||{}).value||'Blanco';
+    let type='text';
+    if(/bandera|flag/i.test(tipo))type='flags';
+    else if(/n[uú]mero|number|fecha|date|dorsal/i.test(tipo))type='number';
+    else if(/icon/i.test(tipo))type='icons';
+    else if(/personal|custom/i.test(tipo))type='custom';
+    const qty=li.quantity||1;
+    const items=[];
+    for(let i=0;i<qty;i++)items.push({type,value:diseno,color:color.toLowerCase()==='negro'||color.toLowerCase()==='black'?'black':'white'});
+    return items;
+  }).flat();
+}
+
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
+
+function measureSizes(ctx,stickers,fs){
+  return stickers.map(s=>{
+    const h=fs+M*2;
+    if(s.type==='text'||s.type==='custom'){ctx.font=`700 ${fs}px ${FONT},sans-serif`;const w=ctx.measureText(s.value).width+M*3;return{w:Math.max(w,h),h}}
+    else if(s.type==='number'){ctx.font=`700 ${fs}px ${FONT},sans-serif`;const w=ctx.measureText(s.value).width+M*3;return{w:Math.max(w,h),h}}
+    else{return{w:h,h}}
+  });
+}
+
+function layoutOrder(sizes){
+  if(!sizes.length)return{rows:[],totalW:0,totalH:0};
+  const sqH=sizes[0].h;const maxW=550;const rows=[];let row=[];let rw=LOGO+GAP;let first=true;
+  sizes.forEach((sz,i)=>{const need=sz.w+GAP;if(rw+need>maxW&&row.length>0){rows.push({items:[...row],hasLogo:first});row=[];rw=0;first=false}row.push({...sz,index:i});rw+=need});
+  if(row.length>0)rows.push({items:row,hasLogo:first});
+  let tw=0;rows.forEach(r=>{let w=r.hasLogo?LOGO+GAP:0;r.items.forEach(it=>{w+=it.w+GAP});tw=Math.max(tw,w)});
+  return{rows,totalW:tw+GAP*2,totalH:rows.length*(sqH+GAP)+GAP*2,sqH};
+}
+
+async function preloadFlags(stickers){
+  const needed=stickers.filter(s=>s.type==='flags'&&!flagCache[s.value]);
+  for(const s of needed){const url=getFlagUrl(s.value);if(url){try{flagCache[s.value]=await loadImg(url)}catch{}}}
+}
+
+async function renderOrderCanvas(ctx,order,stickers,ox,oy,scale=1){
+  const fs=FSIZE*scale;const m=M*scale;const gap=GAP*scale;const bdr=BDR*scale;const logo=LOGO*scale;
+  const sizes=measureSizes(ctx,stickers,fs);const layout=layoutOrder(sizes);const sqH=fs+m*2;
+  let y=oy+gap;
+  for(const row of layout.rows){
+    let x=ox+gap;
+    if(row.hasLogo){
+      ctx.fillStyle='#0a0a0a';roundRect(ctx,x,y,sqH,sqH,5*scale);ctx.fill();
+      const cx=x+sqH/2,cy=y+sqH/2,s=sqH*0.25;
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(cx-s*.7,cy-s);ctx.lineTo(cx+s*.8,cy);ctx.lineTo(cx-s*.7,cy+s);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=3*scale;ctx.lineCap='round';ctx.lineJoin='round';
+      ctx.beginPath();ctx.moveTo(cx,cy-s*.7);ctx.lineTo(cx+s*.6,cy);ctx.lineTo(cx,cy+s*.7);ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font=`600 ${10*scale}px ${FONT},sans-serif`;ctx.textAlign='left';ctx.textBaseline='bottom';
+      ctx.fillText(order.name,x+3*scale,y+sqH-3*scale);
+      x+=sqH+gap;
+    }
+    for(const item of row.items){
+      const sk=stickers[item.index];const w=item.w*scale;const h=sqH;
+      ctx.strokeStyle='#1a1a1a';ctx.lineWidth=bdr;roundRect(ctx,x,y,w,h,3*scale);ctx.stroke();
+      if(sk.type==='text'||sk.type==='number'||sk.type==='custom'){
+        ctx.fillStyle='#1a1a1a';ctx.font=`700 ${fs}px ${FONT},sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(sk.value,x+w/2,y+h/2);
+      }else if(sk.type==='flags'){
+        const img=flagCache[sk.value];
+        if(img){
+          const pad=m*1.3;const aw=w-pad*2;const ah=h-pad*2;
+          const ratio=img.naturalWidth/img.naturalHeight;
+          let dw,dh;if(aw/ah>ratio){dh=ah;dw=dh*ratio}else{dw=aw;dh=dw/ratio}
+          ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh);
+        }
+      }else if(sk.type==='icons'){
+        ctx.fillStyle='#1a1a1a';ctx.font=`${fs*0.55}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(sk.value,x+w/2,y+h/2);
+      }
+      x+=w+gap;
+    }
+    y+=sqH+gap;
+  }
+  return layout;
+}
+
+// API
+const hdrs=()=>({'Content-Type':'application/json','X-Auth-Token':st.token});
+async function apiLogin(pw){const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});if(!r.ok)throw new Error;return r.json()}
+async function apiOrders(shopId,all){const q=all?'&show=all':'';const r=await fetch(`/api/orders?shop=${shopId}${q}`,{headers:hdrs()});if(r.status===401)throw new Error('UNAUTHORIZED');if(!r.ok)throw new Error('Error');return(await r.json()).orders||[]}
+
+function render(){
+  const app=document.getElementById('app');
+  if(!st.token||!st.user){
+    app.innerHTML=`<div class="login"><div class="login-box">
+      <div class="login-logo">⬡ STICKER GENERATOR</div>
+      <div class="login-sub">Generador de diseños</div>
+      <input type="password" class="login-input" id="lp" placeholder="Contraseña" autofocus>
+      <button class="login-btn" id="lb">Entrar</button>
+      <div class="login-err" id="le"></div>
+    </div></div>`;
+    const lb=document.getElementById('lb'),lp=document.getElementById('lp');
+    async function go(){if(!lp.value.trim())return;lb.textContent='...';lb.disabled=true;
+      try{const d=await apiLogin(lp.value.trim());LS.w('sg_t',d.token);LS.s('sg_u',{name:d.name,role:d.role});LS.s('sg_shops',d.shops);
+        st.token=d.token;st.user={name:d.name,role:d.role};st.shops=d.shops||[];st.activeShop=st.shops[0]?.id||null;
+        render();loadOrders();
+      }catch{document.getElementById('le').textContent='Contraseña incorrecta';lb.textContent='Entrar';lb.disabled=false}}
+    lb.onclick=go;lp.onkeydown=e=>{if(e.key==='Enter')go()};
+    return;
+  }
+
+  const orders=st.orders[st.activeShop]||[];
+  const selCount=st.selected.size;
+
+  app.innerHTML=`
+  <div class="app">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title">⬡ STICKER GENERATOR</span>
+        <div class="topbar-sep"></div>
+        <span style="font-size:11px;color:#999">${orders.length} pedidos</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn" id="selAll">Seleccionar todo</button>
+        <button class="btn" id="selNone">Ninguno</button>
+        <button class="btn btn-primary" id="exportBtn" ${selCount===0?'disabled':''}>
+          ⬇ Exportar ${selCount} pedido${selCount!==1?'s':''} (${PRINT_W_CM}cm)
+        </button>
+        <button class="btn" id="logoutBtn">Salir</button>
+      </div>
+    </div>
+    ${st.shops.length>1?`<div class="shop-tabs">${st.shops.map(s=>{
+      const cnt=(st.orders[s.id]||[]).length;
+      return`<button class="shop-tab ${s.id===st.activeShop?'active':''}" data-shop="${s.id}">${s.name}<span class="shop-tab-count">${cnt}</span></button>`
+    }).join('')}</div>`:''}
+    <div class="main">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Pedidos</span>
+          <button class="sidebar-toggle ${st.showAll?'active':''}" id="toggleAll">${st.showAll?'Todos':'Sin preparar'}</button>
+        </div>
+        ${st.loading?'<div class="loading">Cargando pedidos...</div>':''}
+        ${!st.loading&&orders.length===0?'<div class="loading">No hay pedidos</div>':''}
+        ${!st.loading?orders.map((o,i)=>{
+          const stickers=parseStickers(o);
+          if(stickers.length===0)return'';
+          const isSel=st.selected.has(i);
+          const isPrev=st.previewIdx===i;
+          return`<div class="order-item ${isPrev?'previewing':''}" data-idx="${i}">
+            <div class="order-check ${isSel?'checked':''}" data-chk="${i}">${isSel?'✓':''}</div>
+            <div class="order-info" data-prev="${i}">
+              <div class="order-name">${o.name}</div>
+              <div class="order-meta">${stickers.length} stickers · ${new Date(o.created_at).toLocaleDateString()}</div>
+              <div class="order-chips">${stickers.slice(0,6).map(s=>`<span class="order-chip">${s.type==='flags'?s.value:s.value}</span>`).join('')}${stickers.length>6?`<span class="order-chip">+${stickers.length-6}</span>`:''}</div>
+            </div>
+            <div class="order-dl" data-dl="${i}" title="Descargar PNG">⬇</div>
+          </div>`}).join(''):''}
+      </div>
+      <div class="preview" id="previewArea">
+        ${st.previewIdx!==null&&orders[st.previewIdx]?`
+          <div class="preview-label"><strong>${orders[st.previewIdx].name}</strong> Preview</div>
+          <div class="preview-canvas-wrap"><canvas id="prevCanvas"></canvas></div>
+        `:`<div class="empty-state"><div class="empty-state-icon">👈</div><p>Selecciona un pedido para ver el preview</p></div>`}
+        <div class="preview-info">Fondo transparente · Borde fino negro · Fuente Teko 700<br>Exporta a ${PRINT_W_CM}cm de ancho para impresión directa</div>
+      </div>
+    </div>
+  </div>`;
+
+  bindEvents();
+  if(st.previewIdx!==null&&orders[st.previewIdx])renderPreview();
+}
+
+function bindEvents(){
+  document.querySelectorAll('[data-shop]').forEach(b=>b.onclick=()=>{if(b.dataset.shop!==st.activeShop){st.activeShop=b.dataset.shop;st.selected=new Set();st.previewIdx=null;render();if(!st.orders[st.activeShop])loadOrders()}});
+  document.querySelectorAll('[data-chk]').forEach(el=>el.onclick=e=>{e.stopPropagation();const i=+el.dataset.chk;st.selected.has(i)?st.selected.delete(i):st.selected.add(i);render()});
+  document.querySelectorAll('[data-prev]').forEach(el=>el.onclick=()=>{st.previewIdx=+el.dataset.prev;render()});
+  document.querySelectorAll('[data-dl]').forEach(el=>el.onclick=e=>{e.stopPropagation();exportSingle(+el.dataset.dl)});
+  document.getElementById('selAll')?.addEventListener('click',()=>{const orders=st.orders[st.activeShop]||[];orders.forEach((_,i)=>{const stickers=parseStickers(orders[i]);if(stickers.length>0)st.selected.add(i)});render()});
+  document.getElementById('selNone')?.addEventListener('click',()=>{st.selected=new Set();render()});
+  document.getElementById('toggleAll')?.addEventListener('click',()=>{st.showAll=!st.showAll;loadOrders()});
+  document.getElementById('exportBtn')?.addEventListener('click',exportSelected);
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>{LS.d('sg_t');LS.d('sg_u');LS.d('sg_shops');st.token=null;st.user=null;st.shops=[];st.orders={};render()});
+}
+
+async function renderPreview(){
+  const canvas=document.getElementById('prevCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const orders=st.orders[st.activeShop]||[];
+  const order=orders[st.previewIdx];if(!order)return;
+  const stickers=parseStickers(order);if(!stickers.length)return;
+
+  await preloadFlags(stickers);
+
+  const sizes=measureSizes(ctx,stickers,FSIZE);
+  const layout=layoutOrder(sizes);
+
+  canvas.width=layout.totalW*2;canvas.height=layout.totalH*2;
+  canvas.style.width=layout.totalW+'px';canvas.style.height=layout.totalH+'px';
+  ctx.scale(2,2);ctx.clearRect(0,0,layout.totalW,layout.totalH);
+
+  await renderOrderCanvas(ctx,order,stickers,0,0);
+}
+
+async function exportSingle(idx){
+  const orders=st.orders[st.activeShop]||[];const order=orders[idx];if(!order)return;
+  const stickers=parseStickers(order);if(!stickers.length)return;
+
+  await preloadFlags(stickers);
+
+  const c=document.createElement('canvas');const ctx=c.getContext('2d');
+  const sizes=measureSizes(ctx,stickers,FSIZE);const layout=layoutOrder(sizes);
+
+  c.width=layout.totalW*3;c.height=layout.totalH*3;
+  ctx.scale(3,3);ctx.clearRect(0,0,layout.totalW,layout.totalH);
+  await renderOrderCanvas(ctx,order,stickers,0,0);
+
+  const link=document.createElement('a');
+  link.download=`${order.name.replace('#','')}_stickers.png`;
+  link.href=c.toDataURL('image/png');link.click();
+}
+
+async function exportSelected(){
+  if(st.selected.size===0)return;
+  const btn=document.getElementById('exportBtn');if(btn){btn.textContent='Exportando...';btn.disabled=true}
+
+  try{
+    const orders=st.orders[st.activeShop]||[];
+    const selOrders=[...st.selected].sort().map(i=>({order:orders[i],stickers:parseStickers(orders[i])})).filter(o=>o.stickers.length>0);
+
+    // Preload all flags
+    for(const{stickers}of selOrders)await preloadFlags(stickers);
+
+    const tmpC=document.createElement('canvas');const tmpCtx=tmpC.getContext('2d');
+    const printScale=PRINT_W_PX/600;
+
+    // Measure all
+    const layouts=selOrders.map(({stickers})=>{const sizes=measureSizes(tmpCtx,stickers,FSIZE);return layoutOrder(sizes)});
+    const totalH=layouts.reduce((sum,l)=>sum+l.totalH*printScale+ORDER_GAP*printScale,0);
+
+    const c=document.createElement('canvas');c.width=PRINT_W_PX;c.height=Math.ceil(totalH);
+    const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+
+    let yOff=0;
+    for(let i=0;i<selOrders.length;i++){
+      await renderOrderCanvas(ctx,selOrders[i].order,selOrders[i].stickers,0,yOff,printScale);
+      yOff+=layouts[i].totalH*printScale+ORDER_GAP*printScale;
+    }
+
+    const link=document.createElement('a');
+    link.download=`stickers_print_${PRINT_W_CM}cm_${selOrders.length}orders.png`;
+    link.href=c.toDataURL('image/png');link.click();
+  }catch(e){console.error('Export error:',e)}
+
+  if(btn){btn.textContent=`⬇ Exportar ${st.selected.size} pedido${st.selected.size!==1?'s':''} (${PRINT_W_CM}cm)`;btn.disabled=false}
+}
+
+async function loadOrders(){
+  if(!st.activeShop)return;
+  st.loading=true;st.error=null;render();
+  try{
+    const orders=await apiOrders(st.activeShop,st.showAll);
+    st.orders[st.activeShop]=orders;st.loading=false;
+    // Auto-select first order for preview
+    if(orders.length>0&&st.previewIdx===null){
+      const first=orders.findIndex(o=>parseStickers(o).length>0);
+      if(first>=0)st.previewIdx=first;
+    }
+  }catch(e){
+    if(e.message==='UNAUTHORIZED'){LS.d('sg_t');LS.d('sg_u');st.token=null;st.user=null}
+    else st.error=e.message;
+    st.loading=false;
+  }
+  render();
+}
+
+// Wait for font then boot
+const fontCheck=setInterval(()=>{
+  if(document.fonts.check(`700 ${FSIZE}px ${FONT}`)){
+    clearInterval(fontCheck);
+    if(st.token&&st.user){
+      st.shops=LS.g('sg_shops',[]);st.activeShop=st.shops[0]?.id||null;
+      render();loadOrders();
+    }else{render()}
+  }
+},100);
+
+// Fallback if font takes too long
+setTimeout(()=>{clearInterval(fontCheck);if(st.token&&st.user){st.shops=LS.g('sg_shops',[]);st.activeShop=st.shops[0]?.id||null;render();loadOrders()}else{render()}},3000);
+})();
+</script>
+</body>
+</html>

@@ -31,10 +31,7 @@ module.exports = async (req, res) => {
       }
       const data = await response.json();
       allOrders = allOrders.concat(data.orders || []);
-
-      // For "all" mode, limit to 250 most recent to avoid timeout
-      if (showAll && allOrders.length >= 250) break;
-
+      if (showAll && allOrders.length >= 500) break;
       const linkHeader = response.headers.get('link');
       url = null;
       if (linkHeader) { const m = linkHeader.match(/<([^>]+)>;\s*rel="next"/); if (m) url = m[1]; }
