@@ -14,7 +14,6 @@ module.exports = async (req, res) => {
 
   const shop = shops.find(s => s.id === shopId);
   if (!shop) return res.status(404).send('Shop not found');
-
   const showAll = req.query.all === '1';
 
   try {
@@ -26,7 +25,7 @@ module.exports = async (req, res) => {
       const response = await fetch(url, {
         headers: { 'X-Shopify-Access-Token': shop.token, 'Content-Type': 'application/json' }
       });
-      if (!response.ok) return res.status(500).send('Shopify API error: ' + response.status);
+      if (!response.ok) return res.status(500).send('Shopify error: ' + response.status);
       const data = await response.json();
       allOrders = allOrders.concat(data.orders || []);
       if (allOrders.length >= 500) break;
@@ -35,7 +34,78 @@ module.exports = async (req, res) => {
       if (linkHeader) { const m = linkHeader.match(/<([^>]+)>;\s*rel="next"/); if (m) url = m[1]; }
     }
 
-    // Parse stickers from orders
+    // Flag helpers
+    function flagToCode(emoji) {
+      if (!emoji) return null;
+      // Regional indicators (🇪🇸 format)
+      const ris = [];
+      for (const ch of emoji) {
+        const cp = ch.codePointAt(0);
+        if (cp >= 0x1F1E6 && cp <= 0x1F1FF) ris.push(cp);
+      }
+      if (ris.length === 2) {
+        return String.fromCharCode(ris[0] - 0x1F1E6 + 65, ris[1] - 0x1F1E6 + 65).toLowerCase();
+      }
+      // Tag sequences (🏴󠁧󠁢󠁳󠁣󠁴󠁿 format - England, Scotland, Wales)
+      const tags = [];
+      for (const ch of emoji) {
+        const cp = ch.codePointAt(0);
+        if (cp >= 0xE0061 && cp <= 0xE007A) tags.push(String.fromCharCode(cp - 0xE0061 + 97));
+      }
+      if (tags.length >= 4) {
+        const code = tags.join('');
+        return code.substring(0, 2) + '-' + code.substring(2);
+      }
+      return null;
+    }
+
+    // Text name to flag code mapping (fallback)
+    const nameToCode = {
+      'spain':'es','españa':'es','italy':'it','italia':'it','england':'gb-eng','scotland':'gb-sct',
+      'wales':'gb-wls','uk':'gb','united kingdom':'gb','germany':'de','alemania':'de','france':'fr',
+      'francia':'fr','portugal':'pt','belgium':'be','bélgica':'be','netherlands':'nl','holanda':'nl',
+      'poland':'pl','polonia':'pl','croatia':'hr','croacia':'hr','austria':'at','switzerland':'ch',
+      'suiza':'ch','sweden':'se','suecia':'se','norway':'no','noruega':'no','denmark':'dk',
+      'dinamarca':'dk','finland':'fi','finlandia':'fi','greece':'gr','grecia':'gr','ireland':'ie',
+      'irlanda':'ie','czech republic':'cz','chequia':'cz','romania':'ro','rumanía':'ro',
+      'ukraine':'ua','ucrania':'ua','russia':'ru','rusia':'ru','serbia':'rs','slovakia':'sk',
+      'eslovaquia':'sk','usa':'us','united states':'us','estados unidos':'us','brazil':'br',
+      'brasil':'br','argentina':'ar','mexico':'mx','méxico':'mx','colombia':'co','chile':'cl',
+      'peru':'pe','perú':'pe','venezuela':'ve','ecuador':'ec','uruguay':'uy','paraguay':'py',
+      'bolivia':'bo','canada':'ca','canadá':'ca','costa rica':'cr','panama':'pa','panamá':'pa',
+      'cuba':'cu','dominican republic':'do','puerto rico':'pr','honduras':'hn','guatemala':'gt',
+      'morocco':'ma','marruecos':'ma','senegal':'sn','nigeria':'ng','south africa':'za',
+      'sudáfrica':'za','egypt':'eg','egipto':'eg','algeria':'dz','argelia':'dz','tunisia':'tn',
+      'túnez':'tn','cameroon':'cm','camerún':'cm','ivory coast':'ci','ghana':'gh','kenya':'ke',
+      'ethiopia':'et','etiopía':'et','tanzania':'tz','uganda':'ug','zimbabwe':'zw','angola':'ao',
+      'japan':'jp','japón':'jp','south korea':'kr','corea':'kr','china':'cn','india':'in',
+      'turkey':'tr','turquía':'tr','saudi arabia':'sa','arabia saudí':'sa','uae':'ae',
+      'emiratos':'ae','israel':'il','indonesia':'id','philippines':'ph','filipinas':'ph',
+      'thailand':'th','tailandia':'th','vietnam':'vn','malaysia':'my','malasia':'my',
+      'australia':'au','new zealand':'nz','nueva zelanda':'nz','pakistan':'pk','paquistán':'pk'
+    };
+
+    function getFlagCode(value) {
+      // Try emoji first
+      const emojiCode = flagToCode(value);
+      if (emojiCode) return emojiCode;
+      // Try text name
+      const clean = value.replace(/[^\w\sáéíóúñü]/g, '').trim().toLowerCase();
+      if (nameToCode[clean]) return nameToCode[clean];
+      // Try partial match
+      for (const [name, code] of Object.entries(nameToCode)) {
+        if (clean.includes(name) || name.includes(clean)) return code;
+      }
+      return null;
+    }
+
+    function getFlagImg(value) {
+      const code = getFlagCode(value);
+      if (!code) return null;
+      return `https://flagcdn.com/w160/${code}.png`;
+    }
+
+    // Parse stickers
     const ordersWithStickers = allOrders.map(order => {
       const stickers = (order.line_items || []).filter(li => {
         return (li.properties || []).some(p => p.name === '_sticker' && p.value === 'true');
@@ -51,160 +121,113 @@ module.exports = async (req, res) => {
         else if (/icon/i.test(tipo)) type = 'icon';
         else if (/personal|custom/i.test(tipo)) type = 'custom';
         const items = [];
-        for (let i = 0; i < (li.quantity || 1); i++) {
-          items.push({ type, value: diseno, isWhite, tipo });
-        }
+        for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value: diseno, isWhite });
         return items;
       }).flat();
       return { order, stickers };
     }).filter(o => o.stickers.length > 0);
-
-    // Flag emoji to ISO
-    function flagToISO(emoji) {
-      const pts = [];
-      for (const ch of emoji) {
-        const cp = ch.codePointAt(0);
-        if (cp >= 0x1F1E6 && cp <= 0x1F1FF) pts.push(cp);
-      }
-      if (pts.length < 2) return null;
-      return String.fromCharCode(pts[0] - 0x1F1E6 + 65, pts[1] - 0x1F1E6 + 65).toLowerCase();
-    }
 
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stickers — ${shop.name}</title>
-<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  @page { size: landscape; margin: 8mm; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Poppins', sans-serif; background: #fff; color: #1a1a1a; padding: 20px; }
-  
-  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #eee; }
-  .header h1 { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 700; }
-  .header-info { font-size: 12px; color: #999; }
-  .header-actions { display: flex; gap: 8px; }
-  .btn { font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; background: #fff; color: #333; cursor: pointer; text-decoration: none; }
-  .btn:hover { border-color: #999; }
-  .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-  
-  .orders-grid { display: flex; flex-wrap: wrap; gap: 16px; }
-  
-  .order-sheet { 
-    border: 2px solid #ddd; border-radius: 10px; padding: 12px;
-    page-break-inside: avoid; break-inside: avoid;
-    max-width: 380px; background: #fff;
-  }
-  .order-label { 
-    font-family: 'Teko', sans-serif; font-size: 16px; font-weight: 700; 
-    color: #999; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
-  }
-  .order-date { font-family: 'Poppins', sans-serif; font-size: 9px; color: #ccc; font-weight: 400; }
-  
-  .stickers { display: flex; flex-wrap: wrap; gap: 6px; }
-  
-  .sticker {
-    border: 2px solid #1a1a1a; border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    min-height: 50px; position: relative;
-  }
-  .sticker-text {
-    font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700;
-    line-height: 1; padding: 4px 14px; white-space: nowrap;
-  }
-  .sticker-text.white-text { color: #fff; background: #1a1a1a; border-color: #1a1a1a; }
-  .sticker-text.black-text { color: #1a1a1a; }
-  
-  .sticker-number {
-    font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700;
-    line-height: 1; padding: 4px 14px; min-width: 50px; text-align: center;
-  }
-  .sticker-number.white-text { color: #fff; background: #1a1a1a; }
-  .sticker-number.black-text { color: #1a1a1a; }
-  
-  .sticker-flag {
-    width: 54px; height: 50px; padding: 6px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .sticker-flag img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  
-  .sticker-icon {
-    width: 50px; height: 50px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px;
-  }
-  
-  .sticker-custom {
-    font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 500;
-    padding: 6px 10px; max-width: 120px; text-align: center; color: #666;
-    font-style: italic;
-  }
-  
-  .summary { margin-top: 20px; padding-top: 12px; border-top: 2px solid #eee; font-size: 12px; color: #999; }
-  
-  @media print {
-    .header-actions { display: none; }
-    body { padding: 0; }
-    .order-sheet { border: 1px solid #ccc; }
+  @page{margin:5mm}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Poppins',sans-serif;background:#fff;color:#1a1a1a;padding:16px}
+
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #eee}
+  .header h1{font-family:'Teko',sans-serif;font-size:20px;font-weight:700}
+  .header-info{font-size:11px;color:#999}
+  .header-actions{display:flex;gap:6px}
+  .btn{font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;padding:7px 14px;border-radius:6px;border:1px solid #ddd;background:#fff;color:#333;cursor:pointer;text-decoration:none}
+  .btn:hover{border-color:#999}
+  .btn-dark{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+
+  .grid{display:flex;flex-wrap:wrap;gap:12px}
+
+  .sheet{border:1.5px solid #ccc;border-radius:6px;padding:10px;page-break-inside:avoid;break-inside:avoid}
+  .sheet-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #eee}
+  .sheet-name{font-family:'Teko',sans-serif;font-size:14px;font-weight:700;color:#666}
+  .sheet-date{font-size:8px;color:#bbb}
+
+  .stickers{display:flex;flex-wrap:wrap;gap:4px}
+
+  .s{border:1.5px solid #1a1a1a;border-radius:3px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  .s-text{font-family:'Teko',sans-serif;font-size:28px;font-weight:700;line-height:1;padding:3px 10px;white-space:nowrap;color:#1a1a1a}
+  .s-text.wh{color:#fff;background:#1a1a1a}
+
+  .s-num{font-family:'Teko',sans-serif;font-size:28px;font-weight:700;line-height:1;padding:3px 10px;min-width:38px;text-align:center;color:#1a1a1a}
+  .s-num.wh{color:#fff;background:#1a1a1a}
+
+  .s-flag{width:44px;height:38px;padding:4px;display:flex;align-items:center;justify-content:center}
+  .s-flag img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+
+  .s-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:22px}
+
+  .s-custom{font-family:'Poppins',sans-serif;font-size:8px;padding:4px 8px;max-width:100px;text-align:center;color:#888;font-style:italic}
+
+  .s-flag-fallback{font-size:9px;color:#999;padding:4px 8px;font-style:italic}
+
+  .footer{margin-top:16px;padding-top:10px;border-top:2px solid #eee;font-size:11px;color:#999;display:flex;justify-content:space-between}
+
+  @media print{
+    .header-actions{display:none!important}
+    body{padding:0}
+    .sheet{border:1px solid #999}
   }
 </style>
 </head>
 <body>
-
 <div class="header">
   <div>
-    <h1>⬡ ${shop.name} — Sticker Designs</h1>
-    <div class="header-info">${ordersWithStickers.length} pedidos · ${ordersWithStickers.reduce((s, o) => s + o.stickers.length, 0)} stickers · ${new Date().toLocaleDateString()}</div>
+    <h1>${shop.name} — Stickers</h1>
+    <div class="header-info">${ordersWithStickers.length} pedidos · ${ordersWithStickers.reduce((s,o)=>s+o.stickers.length,0)} stickers · ${new Date().toLocaleDateString()}</div>
   </div>
   <div class="header-actions">
-    ${!showAll ? `<a class="btn" href="/api/print-all?token=${token}&shop=${shopId}&all=1">Ver todos (incl. archivados)</a>` : `<a class="btn" href="/api/print-all?token=${token}&shop=${shopId}">Solo sin preparar</a>`}
-    <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir</button>
+    ${!showAll?`<a class="btn" href="/api/print-all?token=${token}&shop=${shopId}&all=1">Incluir archivados</a>`:`<a class="btn" href="/api/print-all?token=${token}&shop=${shopId}">Solo abiertos</a>`}
+    <button class="btn btn-dark" onclick="window.print()">🖨 Imprimir / PDF</button>
   </div>
 </div>
-
-<div class="orders-grid">
-${ordersWithStickers.map(({ order, stickers }) => `
-  <div class="order-sheet">
-    <div class="order-label">
-      ${order.name}
-      <span class="order-date">${new Date(order.created_at).toLocaleDateString()}</span>
-    </div>
-    <div class="stickers">
-      ${stickers.map(s => {
-        if (s.type === 'flag') {
-          const iso = flagToISO(s.value);
-          if (iso) {
-            return `<div class="sticker sticker-flag"><img src="https://flagcdn.com/w160/${iso}.png" alt="${s.value}"></div>`;
-          }
-          return `<div class="sticker sticker-icon">${s.value}</div>`;
+<div class="grid">
+${ordersWithStickers.map(({order,stickers})=>`<div class="sheet">
+  <div class="sheet-label"><span class="sheet-name">${order.name}</span><span class="sheet-date">${new Date(order.created_at).toLocaleDateString()}</span></div>
+  <div class="stickers">
+    ${stickers.map(s=>{
+      if(s.type==='flag'){
+        const flagUrl=getFlagImg(s.value);
+        if(flagUrl){
+          return`<div class="s s-flag"><img src="${flagUrl}" alt="flag" crossorigin="anonymous"></div>`;
         }
-        if (s.type === 'icon') {
-          return `<div class="sticker sticker-icon">${s.value}</div>`;
-        }
-        if (s.type === 'number') {
-          return `<div class="sticker"><div class="sticker-number ${s.isWhite ? 'white-text' : 'black-text'}">${s.value}</div></div>`;
-        }
-        if (s.type === 'custom') {
-          return `<div class="sticker sticker-custom">✨ ${s.value.length > 40 ? s.value.substring(0, 40) + '...' : s.value}</div>`;
-        }
-        return `<div class="sticker"><div class="sticker-text ${s.isWhite ? 'white-text' : 'black-text'}">${s.value}</div></div>`;
-      }).join('')}
-    </div>
+        return`<div class="s"><span class="s-flag-fallback">${s.value}</span></div>`;
+      }
+      if(s.type==='icon'){
+        return`<div class="s s-icon">${s.value}</div>`;
+      }
+      if(s.type==='number'){
+        return`<div class="s"><span class="s-num${s.isWhite?' wh':''}">${s.value}</span></div>`;
+      }
+      if(s.type==='custom'){
+        return`<div class="s"><span class="s-custom">✨ ${s.value.length>30?s.value.substring(0,30)+'...':s.value}</span></div>`;
+      }
+      return`<div class="s"><span class="s-text${s.isWhite?' wh':''}">${s.value}</span></div>`;
+    }).join('')}
   </div>
-`).join('')}
+</div>`).join('')}
 </div>
-
-<div class="summary">
-  Total: ${ordersWithStickers.length} pedidos · ${ordersWithStickers.reduce((s, o) => s + o.stickers.length, 0)} stickers
+<div class="footer">
+  <span>${ordersWithStickers.length} pedidos · ${ordersWithStickers.reduce((s,o)=>s+o.stickers.length,0)} stickers</span>
+  <span>${new Date().toLocaleString()}</span>
 </div>
-
 </body>
 </html>`);
   } catch (err) {
-    console.error('Print all error:', err);
+    console.error('Print-all error:', err);
     res.status(500).send('Error: ' + err.message);
   }
 };
