@@ -29,136 +29,78 @@ module.exports = async (req, res) => {
       if (lh) { const m = lh.match(/<([^>]+)>;\s*rel="next"/); if (m) url = m[1]; }
     }
 
-    // ─── HELPERS: get property by multiple possible names ───
     function getProp(ps, ...names) {
-      for (const n of names) {
-        const p = ps.find(p => p.name.toLowerCase() === n.toLowerCase());
-        if (p) return p.value;
-      }
+      for (const n of names) { const p = ps.find(p => p.name.toLowerCase() === n.toLowerCase()); if (p) return p.value; }
       return '';
     }
 
-    // ─── FLAG DETECTION ───
-    function flagToCode(val) {
-      if (!val) return null;
-      // 1) Regional indicators (🇪🇸)
-      const ris = [];
-      for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0x1F1E6 && cp <= 0x1F1FF) ris.push(cp); }
-      if (ris.length === 2) return String.fromCharCode(ris[0] - 0x1F1E6 + 65, ris[1] - 0x1F1E6 + 65).toLowerCase();
-      // 2) Tag sequences (🏴󠁧󠁢󠁥󠁮󠁧󠁿)
-      const tags = [];
-      for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0xE0061 && cp <= 0xE007A) tags.push(String.fromCharCode(cp - 0xE0061 + 97)); }
-      if (tags.length >= 4) { const c = tags.join(''); return c.substring(0, 2) + '-' + c.substring(2); }
-      // 3) Text name (strip emoji first)
-      const clean = val.replace(/[^\w\sáéíóúñü]/g, '').trim().toLowerCase();
-      const map = {
-        'spain':'es','españa':'es','italy':'it','italia':'it','england':'gb-eng','scotland':'gb-sct',
-        'wales':'gb-wls','uk':'gb','united kingdom':'gb','great britain':'gb','germany':'de','alemania':'de',
-        'france':'fr','francia':'fr','portugal':'pt','belgium':'be','bélgica':'be','netherlands':'nl',
-        'holanda':'nl','holland':'nl','poland':'pl','polonia':'pl','croatia':'hr','croacia':'hr',
-        'austria':'at','switzerland':'ch','suiza':'ch','sweden':'se','suecia':'se','norway':'no',
-        'noruega':'no','denmark':'dk','dinamarca':'dk','finland':'fi','finlandia':'fi','greece':'gr',
-        'grecia':'gr','ireland':'ie','irlanda':'ie','czech republic':'cz','chequia':'cz','romania':'ro',
-        'rumanía':'ro','rumania':'ro','ukraine':'ua','ucrania':'ua','russia':'ru','rusia':'ru',
-        'serbia':'rs','slovakia':'sk','hungary':'hu','hungría':'hu','bulgaria':'bg',
-        'usa':'us','united states':'us','estados unidos':'us','brazil':'br','brasil':'br',
-        'argentina':'ar','mexico':'mx','méxico':'mx','colombia':'co','chile':'cl','peru':'pe',
-        'perú':'pe','venezuela':'ve','ecuador':'ec','uruguay':'uy','paraguay':'py','bolivia':'bo',
-        'canada':'ca','canadá':'ca','costa rica':'cr','panama':'pa','cuba':'cu','jamaica':'jm',
-        'dominican republic':'do','puerto rico':'pr','honduras':'hn','guatemala':'gt',
-        'morocco':'ma','marruecos':'ma','senegal':'sn','nigeria':'ng','south africa':'za',
-        'egypt':'eg','egipto':'eg','algeria':'dz','tunisia':'tn','cameroon':'cm','ivory coast':'ci',
-        'ghana':'gh','kenya':'ke','ethiopia':'et','tanzania':'tz','uganda':'ug','angola':'ao',
-        'japan':'jp','japón':'jp','south korea':'kr','corea':'kr','china':'cn','india':'in',
-        'turkey':'tr','turquía':'tr','turquia':'tr','saudi arabia':'sa','uae':'ae',
-        'israel':'il','indonesia':'id','philippines':'ph','filipinas':'ph',
-        'thailand':'th','tailandia':'th','vietnam':'vn','malaysia':'my',
-        'australia':'au','new zealand':'nz','pakistan':'pk',
-        'albania':'al','kosovo':'xk','north macedonia':'mk','montenegro':'me',
-        'bosnia':'ba','slovenia':'si','latvia':'lv','lithuania':'lt','estonia':'ee'
-      };
-      if (map[clean]) return map[clean];
-      for (const [name, code] of Object.entries(map)) { if (clean.includes(name) || name.includes(clean)) return code; }
-      return null;
-    }
-
-    const cssFlags = {
-      'gb-eng': '<div class="flag-css flag-eng"><div class="flag-eng-h"></div><div class="flag-eng-v"></div></div>',
-      'gb-sct': '<div class="flag-css flag-sct"><div class="flag-sct-x"></div></div>',
-      'gb-wls': '<div class="flag-css flag-wls"><div class="flag-wls-top"></div><div class="flag-wls-bot"></div></div>',
-    };
-
-    function renderFlag(val) {
-      const code = flagToCode(val);
-      if (!code) return `<div class="s s-icon">🏳️</div>`;
-      if (cssFlags[code]) return `<div class="s s-flag">${cssFlags[code]}</div>`;
-      return `<div class="s s-flag"><img src="https://flagcdn.com/w160/${code}.png" onerror="this.parentElement.innerHTML='🏳️'" alt=""></div>`;
-    }
-
-    // ─── PARSE STICKERS ───
-    const ordersWithStickers = allOrders.map(order => {
+    const ordersData = allOrders.map(order => {
       const stickers = (order.line_items || []).filter(li =>
         (li.properties || []).some(p => p.name === '_sticker' && p.value === 'true')
       ).map(li => {
         const ps = li.properties || [];
-        // Support both EN and ES property names
         const tipo = getProp(ps, 'Tipo', 'Type');
         const diseno = getProp(ps, 'Diseño', 'Design');
         const color = getProp(ps, 'Color', 'Colour');
-
         let type = 'text';
         if (/bandera|flag/i.test(tipo)) type = 'flag';
         else if (/n[uú]mero|number|fecha|date|dorsal/i.test(tipo)) type = 'number';
         else if (/icon/i.test(tipo)) type = 'icon';
-        else if (/initial/i.test(tipo)) type = 'text';
         else if (/personal|custom/i.test(tipo)) type = 'custom';
-
         const isWhite = /blanco|white/i.test(color);
-        const value = diseno || li.variant_title || '';
         const items = [];
-        for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value, isWhite });
+        for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value: diseno || li.variant_title || '', isWhite });
         return items;
       }).flat();
-      return { order, stickers };
+      return { name: order.name, date: order.created_at, stickers };
     }).filter(o => o.stickers.length > 0);
-
-    function renderSticker(s) {
-      if (s.type === 'flag') return renderFlag(s.value);
-      if (s.type === 'icon') return `<div class="s s-icon">${s.value}</div>`;
-      if (s.type === 'number') return `<div class="s"><span class="s-txt${s.isWhite ? ' wh' : ''}">${s.value}</span></div>`;
-      if (s.type === 'custom') return `<div class="s"><span class="s-custom">✨ ${s.value.length > 25 ? s.value.substring(0, 25) + '…' : s.value}</span></div>`;
-      return `<div class="s"><span class="s-txt${s.isWhite ? ' wh' : ''}">${s.value}</span></div>`;
-    }
 
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stickers — ${shop.name}</title>
-<link href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@page{margin:5mm}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Poppins',sans-serif;background:#fff;color:#1a1a1a;padding:16px}
-.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #eee}
-.hdr h1{font-family:'Teko',sans-serif;font-size:20px}
-.hdr-info{font-size:10px;color:#999}
-.hdr-btns{display:flex;gap:6px}
-.btn{font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:5px;border:1px solid #ddd;background:#fff;color:#333;cursor:pointer;text-decoration:none}
-.btn:hover{border-color:#999}
-.btn-dk{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-.grid{display:flex;flex-wrap:wrap;gap:10px}
-.sheet{border:1.5px solid #ccc;border-radius:5px;padding:8px;page-break-inside:avoid;break-inside:avoid}
-.sheet-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.sheet-name{font-family:'Teko',sans-serif;font-size:13px;font-weight:700;color:#666}
-.sheet-date{font-size:7px;color:#bbb}
-.stickers{display:grid;grid-template-columns:repeat(4,auto);gap:4px;width:fit-content}
-.s{border:1.5px solid #1a1a1a;border-radius:3px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.s-txt{font-family:'Teko',sans-serif;font-size:28px;font-weight:700;line-height:1.2;padding:6px 12px;white-space:nowrap;color:#1a1a1a}
-.s-txt.wh{color:#fff;background:#1a1a1a}
-.s-flag{width:48px;height:40px;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.s-flag img{width:100%;height:100%;object-fit:contain;display:block;padding:4px}
-.s-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px}
-.s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:90px;text-align:center;color:#888;font-style:italic}
+body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
+
+.toolbar{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #ddd;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.toolbar-left{display:flex;align-items:center;gap:12px}
+.toolbar-title{font-family:'Teko',sans-serif;font-size:18px;font-weight:700}
+.toolbar-info{font-size:10px;color:#999}
+.toolbar-right{display:flex;gap:6px;align-items:center}
+.tbtn{font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:5px;border:1px solid #ddd;background:#fff;color:#333;cursor:pointer;text-decoration:none}
+.tbtn:hover{border-color:#999}
+.tbtn-dk{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+
+/* CONTROL PANEL */
+.panel{background:#fff;border-bottom:1px solid #ddd;padding:10px 20px;display:none;flex-wrap:wrap;gap:16px;align-items:center}
+.panel.open{display:flex}
+.ctrl{display:flex;flex-direction:column;gap:3px}
+.ctrl label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#999;font-weight:600}
+.ctrl input[type=range]{width:120px;accent-color:#1a1a1a}
+.ctrl-val{font-size:10px;color:#666;font-family:'Teko',sans-serif;font-weight:700}
+.ctrl select{font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;background:#fff}
+
+/* CANVAS AREA */
+.canvas-area{padding:20px;display:flex;justify-content:center}
+.canvas-wrap{background:repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 14px 14px;padding:16px;border-radius:8px;border:1px solid #ccc;display:inline-block}
+#render-area{background:transparent}
+
+/* GRID for sticker sheets */
+.sheets{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,12px);padding:8px}
+.sheet{page-break-inside:avoid}
+.sheet-label{font-family:'Teko',sans-serif;font-size:var(--label-size,12px);font-weight:700;color:#aaa;margin-bottom:3px;display:flex;justify-content:space-between}
+.sheet-date{font-family:'Poppins',sans-serif;font-size:7px;color:#ccc;font-weight:400}
+.stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px);width:fit-content}
+.s{border:var(--border-w,1.5px) solid var(--border-color,#1a1a1a);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.s-txt{font-family:'Teko',sans-serif;font-size:var(--font-size,28px);font-weight:700;line-height:1.15;padding:var(--txt-pad-v,5px) var(--txt-pad-h,10px);white-space:nowrap}
+.s-txt.black{color:#1a1a1a}
+.s-txt.white{color:#ffffff}
+.s-flag{width:var(--flag-size,44px);height:var(--flag-size,44px);padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.s-flag img{max-width:80%;max-height:80%;object-fit:contain}
+.s-icon{width:var(--flag-size,44px);height:var(--flag-size,44px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-size,44px) * 0.55)}
+.s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:80px;text-align:center;color:#888;font-style:italic}
 .flag-css{width:100%;height:100%;position:relative}
 .flag-eng{background:#fff}
 .flag-eng-h{position:absolute;top:50%;left:0;right:0;height:20%;background:#CE1124;transform:translateY(-50%)}
@@ -168,27 +110,163 @@ body{font-family:'Poppins',sans-serif;background:#fff;color:#1a1a1a;padding:16px
 .flag-wls{display:flex;flex-direction:column;height:100%}
 .flag-wls-top{flex:1;background:#fff}
 .flag-wls-bot{flex:1;background:#00AB39}
-.ft{margin-top:14px;padding-top:8px;border-top:2px solid #eee;font-size:10px;color:#999;display:flex;justify-content:space-between}
-@media print{.hdr-btns{display:none!important}body{padding:0}.sheet{border:1px solid #aaa}}
+.flag-ire{display:flex;height:100%}
+.flag-ire>div{flex:1}
+.flag-ire-g{background:#169B62}
+.flag-ire-w{background:#fff}
+.flag-ire-o{background:#FF883E}
+
+@media print{.toolbar,.panel{display:none!important}.canvas-area{padding:0}.canvas-wrap{background:none;border:none;padding:0}}
 </style>
 </head><body>
-<div class="hdr">
-  <div><h1>${shop.name} — Stickers</h1><div class="hdr-info">${ordersWithStickers.length} pedidos · ${ordersWithStickers.reduce((s, o) => s + o.stickers.length, 0)} stickers</div></div>
-  <div class="hdr-btns">
-    ${!showAll ? `<a class="btn" href="/api/print-all?token=${token}&shop=${shopId}&all=1">Incluir archivados</a>` : `<a class="btn" href="/api/print-all?token=${token}&shop=${shopId}">Solo abiertos</a>`}
-    <button class="btn btn-dk" onclick="window.print()">🖨 Imprimir / PDF</button>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <span class="toolbar-title">⬡ ${shop.name} — Stickers</span>
+    <span class="toolbar-info">${ordersData.length} pedidos · ${ordersData.reduce((s,o)=>s+o.stickers.length,0)} stickers</span>
+  </div>
+  <div class="toolbar-right">
+    <button class="tbtn" id="togglePanel">⚙ Editar</button>
+    ${!showAll?`<a class="tbtn" href="/api/print-all?token=${token}&shop=${shopId}&all=1">Incluir archivados</a>`:`<a class="tbtn" href="/api/print-all?token=${token}&shop=${shopId}">Solo abiertos</a>`}
+    <button class="tbtn" id="dlPng">⬇ PNG</button>
+    <button class="tbtn" id="dlSvg">⬇ SVG</button>
+    <button class="tbtn tbtn-dk" onclick="window.print()">🖨 Imprimir</button>
   </div>
 </div>
-<div class="grid">
-${ordersWithStickers.map(({ order, stickers }) => `<div class="sheet">
-  <div class="sheet-top"><span class="sheet-name">${order.name}</span><span class="sheet-date">${new Date(order.created_at).toLocaleDateString()}</span></div>
-  <div class="stickers">${stickers.map(renderSticker).join('')}</div>
-</div>`).join('')}
+
+<div class="panel" id="panel">
+  <div class="ctrl"><label>Font size</label><input type="range" id="c-font" min="16" max="48" value="28"><span class="ctrl-val" id="v-font">28px</span></div>
+  <div class="ctrl"><label>Border</label><input type="range" id="c-border" min="0" max="5" value="1.5" step="0.5"><span class="ctrl-val" id="v-border">1.5px</span></div>
+  <div class="ctrl"><label>Border radius</label><input type="range" id="c-radius" min="0" max="10" value="2"><span class="ctrl-val" id="v-radius">2px</span></div>
+  <div class="ctrl"><label>Flag size</label><input type="range" id="c-flag" min="28" max="70" value="44"><span class="ctrl-val" id="v-flag">44px</span></div>
+  <div class="ctrl"><label>Sticker gap</label><input type="range" id="c-gap" min="0" max="12" value="4"><span class="ctrl-val" id="v-gap">4px</span></div>
+  <div class="ctrl"><label>Sheet gap</label><input type="range" id="c-sgap" min="4" max="30" value="12"><span class="ctrl-val" id="v-sgap">12px</span></div>
+  <div class="ctrl"><label>Text pad H</label><input type="range" id="c-padh" min="4" max="24" value="10"><span class="ctrl-val" id="v-padh">10px</span></div>
+  <div class="ctrl"><label>Text pad V</label><input type="range" id="c-padv" min="2" max="16" value="5"><span class="ctrl-val" id="v-padv">5px</span></div>
+  <div class="ctrl"><label>Cols per row</label><input type="range" id="c-cols" min="2" max="8" value="4"><span class="ctrl-val" id="v-cols">4</span></div>
+  <div class="ctrl"><label>Label size</label><input type="range" id="c-label" min="8" max="18" value="12"><span class="ctrl-val" id="v-label">12px</span></div>
+  <div class="ctrl"><label>Border color</label><input type="color" id="c-bcolor" value="#1a1a1a"></div>
 </div>
-<div class="ft"><span>${ordersWithStickers.length} pedidos · ${ordersWithStickers.reduce((s, o) => s + o.stickers.length, 0)} stickers</span><span>${new Date().toLocaleString()}</span></div>
+
+<div class="canvas-area">
+  <div class="canvas-wrap">
+    <div id="render-area" class="sheets"></div>
+  </div>
+</div>
+
+<script>
+const DATA = ${JSON.stringify(ordersData)};
+
+// Flag helpers
+function flagToCode(val){
+  if(!val)return null;
+  const ris=[];for(const ch of val){const cp=ch.codePointAt(0);if(cp>=0x1F1E6&&cp<=0x1F1FF)ris.push(cp)}
+  if(ris.length===2)return String.fromCharCode(ris[0]-0x1F1E6+65,ris[1]-0x1F1E6+65).toLowerCase();
+  const tags=[];for(const ch of val){const cp=ch.codePointAt(0);if(cp>=0xE0061&&cp<=0xE007A)tags.push(String.fromCharCode(cp-0xE0061+97))}
+  if(tags.length>=4){const c=tags.join('');return c.substring(0,2)+'-'+c.substring(2)}
+  const clean=val.replace(/[^\\w\\s]/g,'').trim().toLowerCase();
+  const map={'spain':'es','españa':'es','italy':'it','england':'gb-eng','scotland':'gb-sct','wales':'gb-wls','uk':'gb','united kingdom':'gb','great britain':'gb','germany':'de','france':'fr','portugal':'pt','belgium':'be','netherlands':'nl','holland':'nl','poland':'pl','croatia':'hr','austria':'at','switzerland':'ch','sweden':'se','norway':'no','denmark':'dk','finland':'fi','greece':'gr','ireland':'ie','czech republic':'cz','romania':'ro','ukraine':'ua','russia':'ru','serbia':'rs','usa':'us','united states':'us','brazil':'br','brasil':'br','argentina':'ar','mexico':'mx','colombia':'co','chile':'cl','peru':'pe','venezuela':'ve','ecuador':'ec','uruguay':'uy','canada':'ca','morocco':'ma','nigeria':'ng','south africa':'za','egypt':'eg','japan':'jp','south korea':'kr','china':'cn','india':'in','turkey':'tr','australia':'au','new zealand':'nz','jamaica':'jm','ghana':'gh','kenya':'ke','angola':'ao','cameroon':'cm','senegal':'sn','albania':'al','bosnia':'ba','slovenia':'si','hungary':'hu','bulgaria':'bg','slovakia':'sk','latvia':'lv','lithuania':'lt','estonia':'ee'};
+  if(map[clean])return map[clean];
+  for(const[n,c]of Object.entries(map)){if(clean.includes(n)||n.includes(clean))return c}
+  return null;
+}
+
+const cssFlags={
+  'gb-eng':'<div class="flag-css flag-eng"><div class="flag-eng-h"></div><div class="flag-eng-v"></div></div>',
+  'gb-sct':'<div class="flag-css flag-sct"><div class="flag-sct-x"></div></div>',
+  'gb-wls':'<div class="flag-css flag-wls"><div class="flag-wls-top"></div><div class="flag-wls-bot"></div></div>',
+  'ie':'<div class="flag-css flag-ire"><div class="flag-ire-g"></div><div class="flag-ire-w"></div><div class="flag-ire-o"></div></div>',
+};
+
+function renderFlag(val){
+  const code=flagToCode(val);
+  if(!code)return'<div class="s s-icon">🏳️</div>';
+  if(cssFlags[code])return'<div class="s s-flag">'+cssFlags[code]+'</div>';
+  return'<div class="s s-flag"><img src="https://flagcdn.com/w160/'+code+'.png" onerror="this.style.display=\\'none\\'" alt=""></div>';
+}
+
+function renderSticker(s){
+  if(s.type==='flag')return renderFlag(s.value);
+  if(s.type==='icon')return'<div class="s s-icon">'+s.value+'</div>';
+  const colorClass=s.isWhite?'white':'black';
+  if(s.type==='custom')return'<div class="s"><span class="s-custom">✨ '+(s.value.length>25?s.value.substring(0,25)+'…':s.value)+'</span></div>';
+  return'<div class="s"><span class="s-txt '+colorClass+'">'+s.value+'</span></div>';
+}
+
+function renderAll(){
+  const area=document.getElementById('render-area');
+  area.innerHTML=DATA.map(order=>'<div class="sheet"><div class="sheet-label"><span>'+order.name+'</span><span class="sheet-date">'+new Date(order.date).toLocaleDateString()+'</span></div><div class="stickers">'+order.stickers.map(renderSticker).join('')+'</div></div>').join('');
+}
+
+// Controls
+const controls=[
+  {id:'c-font',css:'--font-size',unit:'px',vid:'v-font'},
+  {id:'c-border',css:'--border-w',unit:'px',vid:'v-border'},
+  {id:'c-radius',css:'--border-r',unit:'px',vid:'v-radius'},
+  {id:'c-flag',css:'--flag-size',unit:'px',vid:'v-flag'},
+  {id:'c-gap',css:'--sticker-gap',unit:'px',vid:'v-gap'},
+  {id:'c-sgap',css:'--sheet-gap',unit:'px',vid:'v-sgap'},
+  {id:'c-padh',css:'--txt-pad-h',unit:'px',vid:'v-padh'},
+  {id:'c-padv',css:'--txt-pad-v',unit:'px',vid:'v-padv'},
+  {id:'c-cols',css:'--cols',unit:'',vid:'v-cols'},
+  {id:'c-label',css:'--label-size',unit:'px',vid:'v-label'},
+];
+
+controls.forEach(c=>{
+  const el=document.getElementById(c.id);
+  if(!el)return;
+  el.addEventListener('input',()=>{
+    document.getElementById('render-area').style.setProperty(c.css,el.value+c.unit);
+    document.getElementById(c.vid).textContent=el.value+c.unit;
+  });
+});
+
+document.getElementById('c-bcolor')?.addEventListener('input',(e)=>{
+  document.getElementById('render-area').style.setProperty('--border-color',e.target.value);
+});
+
+document.getElementById('togglePanel')?.addEventListener('click',()=>{
+  document.getElementById('panel').classList.toggle('open');
+});
+
+// Download PNG
+document.getElementById('dlPng')?.addEventListener('click',async()=>{
+  const el=document.getElementById('render-area');
+  const btn=document.getElementById('dlPng');
+  btn.textContent='Generando...';
+  
+  // Use html2canvas approach via canvas
+  try{
+    const {default:h2c}=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');
+    const canvas=await h2c(el,{backgroundColor:null,scale:3,useCORS:true});
+    const link=document.createElement('a');
+    link.download='stickers_${shop.name.replace(/[^a-zA-Z0-9]/g,'_')}.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+  }catch(e){
+    console.error(e);
+    alert('Error generating PNG. Try Print > Save as PDF instead.');
+  }
+  btn.textContent='⬇ PNG';
+});
+
+// Download SVG
+document.getElementById('dlSvg')?.addEventListener('click',()=>{
+  const el=document.getElementById('render-area');
+  const styles=document.querySelector('style').textContent;
+  const svgContent='<svg xmlns="http://www.w3.org/2000/svg" width="'+el.scrollWidth+'" height="'+el.scrollHeight+'"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>'+styles+'</style>'+el.outerHTML+'</div></foreignObject></svg>';
+  const blob=new Blob([svgContent],{type:'image/svg+xml'});
+  const link=document.createElement('a');
+  link.download='stickers_${shop.name.replace(/[^a-zA-Z0-9]/g,'_')}.svg';
+  link.href=URL.createObjectURL(blob);
+  link.click();
+});
+
+renderAll();
+</script>
 </body></html>`);
-  } catch (err) {
+  } catch(err){
     console.error(err);
-    res.status(500).send('Error: ' + err.message);
+    res.status(500).send('Error: '+err.message);
   }
 };
