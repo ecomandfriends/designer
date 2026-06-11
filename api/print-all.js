@@ -29,15 +29,27 @@ module.exports = async (req, res) => {
       if (lh) { const m = lh.match(/<([^>]+)>;\s*rel="next"/); if (m) url = m[1]; }
     }
 
+    // ─── HELPERS: get property by multiple possible names ───
+    function getProp(ps, ...names) {
+      for (const n of names) {
+        const p = ps.find(p => p.name.toLowerCase() === n.toLowerCase());
+        if (p) return p.value;
+      }
+      return '';
+    }
+
     // ─── FLAG DETECTION ───
     function flagToCode(val) {
       if (!val) return null;
+      // 1) Regional indicators (🇪🇸)
       const ris = [];
       for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0x1F1E6 && cp <= 0x1F1FF) ris.push(cp); }
       if (ris.length === 2) return String.fromCharCode(ris[0] - 0x1F1E6 + 65, ris[1] - 0x1F1E6 + 65).toLowerCase();
+      // 2) Tag sequences (🏴󠁧󠁢󠁥󠁮󠁧󠁿)
       const tags = [];
       for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0xE0061 && cp <= 0xE007A) tags.push(String.fromCharCode(cp - 0xE0061 + 97)); }
       if (tags.length >= 4) { const c = tags.join(''); return c.substring(0, 2) + '-' + c.substring(2); }
+      // 3) Text name (strip emoji first)
       const clean = val.replace(/[^\w\sáéíóúñü]/g, '').trim().toLowerCase();
       const map = {
         'spain':'es','españa':'es','italy':'it','italia':'it','england':'gb-eng','scotland':'gb-sct',
@@ -48,7 +60,7 @@ module.exports = async (req, res) => {
         'noruega':'no','denmark':'dk','dinamarca':'dk','finland':'fi','finlandia':'fi','greece':'gr',
         'grecia':'gr','ireland':'ie','irlanda':'ie','czech republic':'cz','chequia':'cz','romania':'ro',
         'rumanía':'ro','rumania':'ro','ukraine':'ua','ucrania':'ua','russia':'ru','rusia':'ru',
-        'serbia':'rs','slovakia':'sk','hungary':'hu','bulgaria':'bg',
+        'serbia':'rs','slovakia':'sk','hungary':'hu','hungría':'hu','bulgaria':'bg',
         'usa':'us','united states':'us','estados unidos':'us','brazil':'br','brasil':'br',
         'argentina':'ar','mexico':'mx','méxico':'mx','colombia':'co','chile':'cl','peru':'pe',
         'perú':'pe','venezuela':'ve','ecuador':'ec','uruguay':'uy','paraguay':'py','bolivia':'bo',
@@ -70,7 +82,6 @@ module.exports = async (req, res) => {
       return null;
     }
 
-    // CSS flags for subdivisions (no external image needed)
     const cssFlags = {
       'gb-eng': '<div class="flag-css flag-eng"><div class="flag-eng-h"></div><div class="flag-eng-v"></div></div>',
       'gb-sct': '<div class="flag-css flag-sct"><div class="flag-sct-x"></div></div>',
@@ -80,9 +91,7 @@ module.exports = async (req, res) => {
     function renderFlag(val) {
       const code = flagToCode(val);
       if (!code) return `<div class="s s-icon">🏳️</div>`;
-      // Subdivision → CSS flag
       if (cssFlags[code]) return `<div class="s s-flag">${cssFlags[code]}</div>`;
-      // Regular country → flagcdn.com PNG
       return `<div class="s s-flag"><img src="https://flagcdn.com/w160/${code}.png" onerror="this.parentElement.innerHTML='🏳️'" alt=""></div>`;
     }
 
@@ -92,17 +101,22 @@ module.exports = async (req, res) => {
         (li.properties || []).some(p => p.name === '_sticker' && p.value === 'true')
       ).map(li => {
         const ps = li.properties || [];
-        const tipo = (ps.find(p => p.name === 'Tipo') || {}).value || '';
-        const diseno = (ps.find(p => p.name === 'Diseño' || p.name === 'Design') || {}).value || li.variant_title || '';
-        const color = (ps.find(p => p.name === 'Color') || {}).value || 'Negro';
-        const isWhite = /blanco|white/i.test(color);
+        // Support both EN and ES property names
+        const tipo = getProp(ps, 'Tipo', 'Type');
+        const diseno = getProp(ps, 'Diseño', 'Design');
+        const color = getProp(ps, 'Color', 'Colour');
+
         let type = 'text';
         if (/bandera|flag/i.test(tipo)) type = 'flag';
         else if (/n[uú]mero|number|fecha|date|dorsal/i.test(tipo)) type = 'number';
         else if (/icon/i.test(tipo)) type = 'icon';
+        else if (/initial/i.test(tipo)) type = 'text';
         else if (/personal|custom/i.test(tipo)) type = 'custom';
+
+        const isWhite = /blanco|white/i.test(color);
+        const value = diseno || li.variant_title || '';
         const items = [];
-        for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value: diseno, isWhite });
+        for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value, isWhite });
         return items;
       }).flat();
       return { order, stickers };
@@ -145,24 +159,15 @@ body{font-family:'Poppins',sans-serif;background:#fff;color:#1a1a1a;padding:16px
 .s-flag img{width:100%;height:100%;object-fit:contain;display:block;padding:4px}
 .s-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px}
 .s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:90px;text-align:center;color:#888;font-style:italic}
-
-/* ─── CSS FLAGS (England, Scotland, Wales) ─── */
 .flag-css{width:100%;height:100%;position:relative}
-
-/* England: white + red cross */
 .flag-eng{background:#fff}
 .flag-eng-h{position:absolute;top:50%;left:0;right:0;height:20%;background:#CE1124;transform:translateY(-50%)}
 .flag-eng-v{position:absolute;left:50%;top:0;bottom:0;width:20%;background:#CE1124;transform:translateX(-50%)}
-
-/* Scotland: blue + white X */
 .flag-sct{background:#005EB8;overflow:hidden}
 .flag-sct-x{position:absolute;inset:0;background:linear-gradient(to top right,transparent 42%,#fff 42%,#fff 58%,transparent 58%),linear-gradient(to bottom right,transparent 42%,#fff 42%,#fff 58%,transparent 58%)}
-
-/* Wales: white top + green bottom */
 .flag-wls{display:flex;flex-direction:column;height:100%}
 .flag-wls-top{flex:1;background:#fff}
 .flag-wls-bot{flex:1;background:#00AB39}
-
 .ft{margin-top:14px;padding-top:8px;border-top:2px solid #eee;font-size:10px;color:#999;display:flex;justify-content:space-between}
 @media print{.hdr-btns{display:none!important}body{padding:0}.sheet{border:1px solid #aaa}}
 </style>
