@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
         'france':'fr','francia':'fr','portugal':'pt','belgium':'be','bélgica':'be','netherlands':'nl',
         'holanda':'nl','holland':'nl','poland':'pl','polonia':'pl','croatia':'hr','croacia':'hr',
         'austria':'at','switzerland':'ch','sweden':'se','norway':'no','denmark':'dk','finland':'fi',
-        'greece':'gr','ireland':'ie','czech republic':'cz','chequia':'cz','romania':'ro',
+        'greece':'gr','ireland':'ie','irlanda':'ie','czech republic':'cz','romania':'ro',
         'ukraine':'ua','russia':'ru','serbia':'rs','slovakia':'sk','hungary':'hu','bulgaria':'bg',
         'usa':'us','united states':'us','brazil':'br','brasil':'br',
         'argentina':'ar','mexico':'mx','méxico':'mx','colombia':'co','chile':'cl','peru':'pe',
@@ -70,8 +70,16 @@ module.exports = async (req, res) => {
       return null;
     }
 
-    function flagImgUrl(code) {
-      return 'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/flags/4x3/' + code + '.svg';
+    // Subdivision codes that need CSS flags (flagcdn.com doesn't support them)
+    const CSS_FLAG_CODES = ['gb-eng', 'gb-sct', 'gb-wls'];
+
+    function renderFlagHTML(flagCode) {
+      if (!flagCode) return '<div class="s s-icon">🏳️</div>';
+      if (flagCode === 'gb-eng') return '<div class="s s-flag"><div class="css-flag eng"><div class="eng-h"></div><div class="eng-v"></div></div></div>';
+      if (flagCode === 'gb-sct') return '<div class="s s-flag"><div class="css-flag sct"></div></div>';
+      if (flagCode === 'gb-wls') return '<div class="s s-flag"><div class="css-flag wls"><div class="wls-t"></div><div class="wls-b"></div></div></div>';
+      // Regular country → flagcdn.com PNG (high res)
+      return '<div class="s s-flag"><img src="https://flagcdn.com/w320/' + flagCode + '.png" crossorigin="anonymous" alt=""></div>';
     }
 
     const ordersData = allOrders.map(order => {
@@ -96,6 +104,13 @@ module.exports = async (req, res) => {
       }).flat();
       return { name: order.name, date: order.created_at, stickers };
     }).filter(o => o.stickers.length > 0);
+
+    function renderSticker(s) {
+      if (s.type === 'flag') return renderFlagHTML(s.flagCode);
+      if (s.type === 'icon') return '<div class="s s-icon">' + s.value + '</div>';
+      if (s.type === 'custom') return '<div class="s"><span class="s-custom">✨ ' + (s.value.length > 25 ? s.value.substring(0, 25) + '…' : s.value) + '</span></div>';
+      return '<div class="s"><span class="s-txt ' + (s.isWhite ? 'white' : 'black') + '">' + s.value + '</span></div>';
+    }
 
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!DOCTYPE html><html><head>
@@ -128,12 +143,21 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
 .stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px)}
 .s{border:var(--border-w,1.5px) solid var(--border-color,#1a1a1a);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .s-txt{font-family:'Teko',sans-serif;font-size:var(--font-size,28px);font-weight:700;line-height:var(--line-h,1.15);padding:var(--txt-pad-v,5px) var(--txt-pad-h,10px);white-space:nowrap}
-.s-txt.black{color:#1a1a1a}
-.s-txt.white{color:#ffffff}
-.s-flag{width:var(--flag-w,52px);height:var(--flag-h,36px);padding:4px;display:flex;align-items:center;justify-content:center}
-.s-flag img{width:100%;height:100%;object-fit:contain;display:block}
+.s-txt.black{color:#1a1a1a}.s-txt.white{color:#fff}
+.s-flag{width:var(--flag-w,52px);height:var(--flag-h,36px);padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.s-flag img{width:100%;height:100%;object-fit:cover;display:block}
 .s-icon{width:var(--flag-w,52px);height:var(--flag-h,36px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-h,36px)*0.55)}
 .s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:80px;text-align:center;color:#888;font-style:italic}
+
+/* CSS FLAGS */
+.css-flag{width:100%;height:100%;position:relative}
+.eng{background:#fff}
+.eng-h{position:absolute;top:50%;left:0;right:0;height:22%;background:#CE1124;transform:translateY(-50%)}
+.eng-v{position:absolute;left:50%;top:0;bottom:0;width:18%;background:#CE1124;transform:translateX(-50%)}
+.sct{background:linear-gradient(to top left,#005EB8 43%,#fff 43%,#fff 57%,#005EB8 57%),linear-gradient(to top right,#005EB8 43%,#fff 43%,#fff 57%,#005EB8 57%);background-size:100% 100%}
+.wls{display:flex;flex-direction:column;height:100%}
+.wls-t{flex:1;background:#fff}.wls-b{flex:1;background:#00AB39}
+
 @media print{.toolbar,.panel{display:none!important}.canvas-area{padding:0}.canvas-wrap{background:none!important;border:none;padding:0}}
 </style>
 </head><body>
@@ -154,11 +178,11 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
   <div class="ctrl"><label>Font size</label><input type="range" id="c-font" min="16" max="48" value="28"><span class="ctrl-val" id="v-font">28</span></div>
   <div class="ctrl"><label>Line height</label><input type="range" id="c-lh" min="0.8" max="1.8" value="1.15" step="0.05"><span class="ctrl-val" id="v-lh">1.15</span></div>
   <div class="ctrl"><label>Sticker border</label><input type="range" id="c-border" min="0" max="5" value="1.5" step="0.5"><span class="ctrl-val" id="v-border">1.5</span></div>
-  <div class="ctrl"><label>Border radius</label><input type="range" id="c-radius" min="0" max="10" value="2"><span class="ctrl-val" id="v-radius">2</span></div>
+  <div class="ctrl"><label>Radius</label><input type="range" id="c-radius" min="0" max="10" value="2"><span class="ctrl-val" id="v-radius">2</span></div>
   <div class="ctrl"><label>Sheet border</label><input type="range" id="c-sborder" min="0" max="4" value="1.5" step="0.5"><span class="ctrl-val" id="v-sborder">1.5</span></div>
   <div class="ctrl"><label>Flag W</label><input type="range" id="c-flagw" min="30" max="80" value="52"><span class="ctrl-val" id="v-flagw">52</span></div>
   <div class="ctrl"><label>Flag H</label><input type="range" id="c-flagh" min="20" max="60" value="36"><span class="ctrl-val" id="v-flagh">36</span></div>
-  <div class="ctrl"><label>Sticker gap</label><input type="range" id="c-gap" min="0" max="12" value="4"><span class="ctrl-val" id="v-gap">4</span></div>
+  <div class="ctrl"><label>Gap</label><input type="range" id="c-gap" min="0" max="12" value="4"><span class="ctrl-val" id="v-gap">4</span></div>
   <div class="ctrl"><label>Sheet gap</label><input type="range" id="c-sgap" min="4" max="30" value="10"><span class="ctrl-val" id="v-sgap">10</span></div>
   <div class="ctrl"><label>Pad H</label><input type="range" id="c-padh" min="4" max="24" value="10"><span class="ctrl-val" id="v-padh">10</span></div>
   <div class="ctrl"><label>Pad V</label><input type="range" id="c-padv" min="2" max="16" value="5"><span class="ctrl-val" id="v-padv">5</span></div>
@@ -172,15 +196,7 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
     <div id="render-area">
     ${ordersData.map(order => `<div class="sheet">
       <div class="sheet-label"><span>${order.name}</span><span class="sheet-date">${new Date(order.date).toLocaleDateString()}</span></div>
-      <div class="stickers">${order.stickers.map(s => {
-        if (s.type === 'flag') {
-          if (s.flagCode) return `<div class="s s-flag"><img src="${flagImgUrl(s.flagCode)}" crossorigin="anonymous" alt=""></div>`;
-          return `<div class="s s-icon">🏳️</div>`;
-        }
-        if (s.type === 'icon') return `<div class="s s-icon">${s.value}</div>`;
-        if (s.type === 'custom') return `<div class="s"><span class="s-custom">✨ ${s.value.length > 25 ? s.value.substring(0, 25) + '…' : s.value}</span></div>`;
-        return `<div class="s"><span class="s-txt ${s.isWhite ? 'white' : 'black'}">${s.value}</span></div>`;
-      }).join('')}</div>
+      <div class="stickers">${order.stickers.map(renderSticker).join('')}</div>
     </div>`).join('')}
     </div>
   </div>
@@ -188,9 +204,7 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
 <script>
 const area=document.getElementById('render-area');
 const wrap=document.getElementById('canvas-wrap');
-const PRINT_W_CM=58;
-const PRINT_DPI=300;
-const PRINT_W_PX=Math.round(PRINT_W_CM*10*PRINT_DPI/25.4);
+const PRINT_W_PX=Math.round(580*300/25.4); // 58cm at 300dpi
 
 const ctrls=[
   {id:'c-font',css:'--font-size',u:'px',v:'v-font'},
@@ -207,60 +221,41 @@ const ctrls=[
   {id:'c-cols',css:'--cols',u:'',v:'v-cols'},
   {id:'c-label',css:'--label-size',u:'px',v:'v-label'},
 ];
-ctrls.forEach(c=>{
-  const el=document.getElementById(c.id);if(!el)return;
-  el.addEventListener('input',()=>{
-    area.style.setProperty(c.css,el.value+c.u);
-    document.getElementById(c.v).textContent=el.value;
-  });
-});
+ctrls.forEach(c=>{const el=document.getElementById(c.id);if(!el)return;el.addEventListener('input',()=>{area.style.setProperty(c.css,el.value+c.u);document.getElementById(c.v).textContent=el.value})});
 document.getElementById('c-bcolor')?.addEventListener('input',e=>{area.style.setProperty('--border-color',e.target.value)});
-document.getElementById('c-bg')?.addEventListener('change',e=>{
-  const v=e.target.value;
-  wrap.style.background=v==='check'?'repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 50% / 14px 14px':v;
-});
+document.getElementById('c-bg')?.addEventListener('change',e=>{wrap.style.background=e.target.value==='check'?'repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 50% / 14px 14px':e.target.value});
 document.getElementById('togglePanel')?.addEventListener('click',()=>{document.getElementById('panel').classList.toggle('open')});
 
-// PNG export at 58cm width, 300 DPI
+// Wait for ALL images to fully load
+function waitImages(){
+  const imgs=[...area.querySelectorAll('img')];
+  return Promise.all(imgs.map(img=>{
+    if(img.complete&&img.naturalWidth>0)return Promise.resolve();
+    return new Promise(r=>{img.onload=r;img.onerror=()=>{img.style.display='none';r()}});
+  }));
+}
+
+// PNG export — 58cm wide at 300dpi
 document.getElementById('dlPng')?.addEventListener('click',async()=>{
-  const btn=document.getElementById('dlPng');btn.textContent='Generando...';btn.disabled=true;
+  const btn=document.getElementById('dlPng');btn.textContent='Espera...';btn.disabled=true;
   try{
-    // Wait for all flag images to load
-    const imgs=area.querySelectorAll('img');
-    await Promise.all([...imgs].map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r})));
-
+    await waitImages();
     const m=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');
-    const areaW=area.scrollWidth;
-    const scale=Math.max(3,Math.ceil(PRINT_W_PX/areaW));
-    
-    const canvas=await m.default(area,{
-      backgroundColor:null,
-      scale:scale,
-      useCORS:true,
-      allowTaint:false,
-      logging:false,
-      imageTimeout:15000,
-      onclone:function(doc){
-        // Ensure fonts are applied in cloned document
-        const el=doc.getElementById('render-area');
-        if(el)el.style.fontSmooth='always';
-      }
-    });
-
-    // Resize to exactly 58cm width maintaining aspect ratio
-    const finalCanvas=document.createElement('canvas');
-    finalCanvas.width=PRINT_W_PX;
-    finalCanvas.height=Math.round(canvas.height*(PRINT_W_PX/canvas.width));
-    const fctx=finalCanvas.getContext('2d');
-    fctx.imageSmoothingEnabled=true;
-    fctx.imageSmoothingQuality='high';
-    fctx.drawImage(canvas,0,0,finalCanvas.width,finalCanvas.height);
-
+    const scale=Math.ceil(PRINT_W_PX/area.scrollWidth);
+    const canvas=await m.default(area,{backgroundColor:null,scale:scale,useCORS:true,allowTaint:false,logging:false,imageTimeout:30000});
+    // Resize to exact 58cm width
+    const final=document.createElement('canvas');
+    final.width=PRINT_W_PX;
+    final.height=Math.round(canvas.height*(PRINT_W_PX/canvas.width));
+    const ctx=final.getContext('2d');
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(canvas,0,0,final.width,final.height);
     const a=document.createElement('a');
-    a.download='stickers_${shop.name.replace(/[^a-zA-Z0-9]/g,'_')}_58cm.png';
-    a.href=finalCanvas.toDataURL('image/png');
+    a.download='stickers_58cm.png';
+    a.href=final.toDataURL('image/png');
     a.click();
-  }catch(e){console.error(e);alert('Error: '+e.message+'\\nTry Print > Save as PDF.')}
+  }catch(e){console.error(e);alert('Error: '+e.message)}
   btn.textContent='⬇ PNG (58cm)';btn.disabled=false;
 });
 
@@ -270,6 +265,9 @@ document.getElementById('dlSvg')?.addEventListener('click',()=>{
   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+area.scrollWidth+'" height="'+area.scrollHeight+'"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>'+css+'</style>'+area.outerHTML+'</div></foreignObject></svg>';
   const a=document.createElement('a');a.download='stickers.svg';a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.click();
 });
+
+// Preload flag images on page load
+waitImages().then(()=>console.log('All flag images loaded'));
 </script>
 </body></html>`);
   } catch(err){console.error(err);res.status(500).send('Error: '+err.message)}
