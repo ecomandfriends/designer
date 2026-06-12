@@ -34,7 +34,6 @@ module.exports = async (req, res) => {
       return '';
     }
 
-    // Flag code detection
     function flagToCode(val) {
       if (!val) return null;
       const ris = [];
@@ -75,7 +74,6 @@ module.exports = async (req, res) => {
       return null;
     }
 
-    // Parse stickers
     const ordersData = allOrders.map(order => {
       const stickers = (order.line_items || []).filter(li =>
         (li.properties || []).some(p => p.name === '_sticker' && p.value === 'true')
@@ -103,39 +101,38 @@ module.exports = async (req, res) => {
     res.send(`<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stickers — ${shop.name}</title>
-<link href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
+body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
 
-.toolbar{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #ddd;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.toolbar-left{display:flex;align-items:center;gap:12px}
+.toolbar{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #ddd;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.toolbar-left{display:flex;align-items:center;gap:10px}
 .toolbar-title{font-family:'Teko',sans-serif;font-size:18px;font-weight:700}
 .toolbar-info{font-size:10px;color:#999}
-.toolbar-right{display:flex;gap:6px;align-items:center}
-.tbtn{font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:5px;border:1px solid #ddd;background:#fff;color:#333;cursor:pointer;text-decoration:none}
+.toolbar-right{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.tbtn{font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;padding:5px 12px;border-radius:4px;border:1px solid #ddd;background:#fff;color:#333;cursor:pointer;text-decoration:none;white-space:nowrap}
 .tbtn:hover{border-color:#999}
 .tbtn-dk{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 
-.panel{background:#fff;border-bottom:1px solid #ddd;padding:10px 20px;display:none;flex-wrap:wrap;gap:16px;align-items:center}
+.panel{background:#fff;border-bottom:1px solid #ddd;padding:8px 16px;display:none;flex-wrap:wrap;gap:12px;align-items:center}
 .panel.open{display:flex}
-.ctrl{display:flex;flex-direction:column;gap:3px}
-.ctrl label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#999;font-weight:600}
-.ctrl input[type=range]{width:120px;accent-color:#1a1a1a}
-.ctrl-val{font-size:10px;color:#666;font-family:'Teko',sans-serif;font-weight:700}
+.ctrl{display:flex;flex-direction:column;gap:2px}
+.ctrl label{font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:#999;font-weight:600}
+.ctrl input[type=range]{width:100px;accent-color:#1a1a1a}
+.ctrl-val{font-size:9px;color:#666;font-family:'Teko',sans-serif;font-weight:700}
 
 .canvas-area{padding:20px;display:flex;justify-content:center}
-.canvas-wrap{background:repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 14px 14px;padding:16px;border-radius:8px;border:1px solid #ccc;display:inline-block}
+.canvas-wrap{background:var(--preview-bg,repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 50% / 14px 14px);padding:12px;border-radius:8px;border:1px solid #ccc;display:inline-block}
 
-#render-area{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,12px);padding:8px}
+#render-area{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,10px);align-items:flex-start}
 
-.sheet{border:var(--sheet-border,1.5px) solid #bbb;border-radius:5px;padding:8px;page-break-inside:avoid;break-inside:avoid;background:transparent}
-.sheet-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.sheet-name{font-family:'Teko',sans-serif;font-size:var(--label-size,12px);font-weight:700;color:#888}
-.sheet-date{font-family:'Poppins',sans-serif;font-size:7px;color:#ccc}
+.sheet{border:var(--sheet-border,1.5px) solid #1a1a1a;border-radius:4px;padding:6px;display:inline-block}
+.sheet-label{margin-bottom:4px;font-family:'Poppins',sans-serif;font-size:var(--label-size,11px);font-weight:400;color:#1a1a1a;display:flex;justify-content:space-between;gap:12px}
+.sheet-date{font-size:7px;color:#999}
 
-.stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px);width:fit-content}
+.stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px)}
 
 .s{border:var(--border-w,1.5px) solid var(--border-color,#1a1a1a);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden}
 
@@ -143,25 +140,25 @@ body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
 .s-txt.black{color:#1a1a1a}
 .s-txt.white{color:#ffffff}
 
-.s-flag{width:var(--flag-size,44px);height:var(--flag-size,44px);padding:0;display:flex;align-items:center;justify-content:center}
-.s-flag{width:var(--flag-size,56px);height:calc(var(--flag-size,56px) * 0.7);
+.s-flag{width:var(--flag-w,52px);height:var(--flag-h,36px);padding:0;display:flex;align-items:center;justify-content:center}
+.s-flag .fi{font-size:var(--flag-icon,24px);line-height:1}
 
-.s-icon{width:var(--flag-size,44px);height:var(--flag-size,44px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-size,44px) * 0.55)}
+.s-icon{width:var(--flag-w,52px);height:var(--flag-h,36px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-h,36px) * 0.55)}
 
 .s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:80px;text-align:center;color:#888;font-style:italic}
 
-@media print{.toolbar,.panel{display:none!important}.canvas-area{padding:0}.canvas-wrap{background:none;border:none;padding:0}}
+@media print{.toolbar,.panel{display:none!important}.canvas-area{padding:0}.canvas-wrap{background:none!important;border:none;padding:0}}
 </style>
 </head><body>
 
 <div class="toolbar">
   <div class="toolbar-left">
-    <span class="toolbar-title">⬡ ${shop.name} — Stickers</span>
+    <span class="toolbar-title">⬡ ${shop.name}</span>
     <span class="toolbar-info">${ordersData.length} pedidos · ${ordersData.reduce((s,o)=>s+o.stickers.length,0)} stickers</span>
   </div>
   <div class="toolbar-right">
     <button class="tbtn" id="togglePanel">⚙ Editar</button>
-    ${!showAll?`<a class="tbtn" href="/api/print-all?token=${token}&shop=${shopId}&all=1">Incluir archivados</a>`:`<a class="tbtn" href="/api/print-all?token=${token}&shop=${shopId}">Solo abiertos</a>`}
+    ${!showAll?`<a class="tbtn" href="/api/print-all?token=${token}&shop=${shopId}&all=1">+ Archivados</a>`:`<a class="tbtn" href="/api/print-all?token=${token}&shop=${shopId}">Solo abiertos</a>`}
     <button class="tbtn" id="dlPng">⬇ PNG</button>
     <button class="tbtn" id="dlSvg">⬇ SVG</button>
     <button class="tbtn tbtn-dk" onclick="window.print()">🖨 Imprimir</button>
@@ -169,25 +166,37 @@ body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
 </div>
 
 <div class="panel" id="panel">
-  <div class="ctrl"><label>Font size</label><input type="range" id="c-font" min="16" max="48" value="28"><span class="ctrl-val" id="v-font">28px</span></div>
-  <div class="ctrl"><label>Sticker border</label><input type="range" id="c-border" min="0" max="5" value="1.5" step="0.5"><span class="ctrl-val" id="v-border">1.5px</span></div>
-  <div class="ctrl"><label>Border radius</label><input type="range" id="c-radius" min="0" max="10" value="2"><span class="ctrl-val" id="v-radius">2px</span></div>
-  <div class="ctrl"><label>Sheet border</label><input type="range" id="c-sborder" min="0" max="4" value="1.5" step="0.5"><span class="ctrl-val" id="v-sborder">1.5px</span></div>
-  <div class="ctrl"><label>Flag size</label><input type="range" id="c-flag" min="28" max="70" value="44"><span class="ctrl-val" id="v-flag">44px</span></div>
-  <div class="ctrl"><label>Sticker gap</label><input type="range" id="c-gap" min="0" max="12" value="4"><span class="ctrl-val" id="v-gap">4px</span></div>
-  <div class="ctrl"><label>Sheet gap</label><input type="range" id="c-sgap" min="4" max="30" value="12"><span class="ctrl-val" id="v-sgap">12px</span></div>
-  <div class="ctrl"><label>Text pad H</label><input type="range" id="c-padh" min="4" max="24" value="10"><span class="ctrl-val" id="v-padh">10px</span></div>
-  <div class="ctrl"><label>Text pad V</label><input type="range" id="c-padv" min="2" max="16" value="5"><span class="ctrl-val" id="v-padv">5px</span></div>
-  <div class="ctrl"><label>Cols per row</label><input type="range" id="c-cols" min="2" max="8" value="4"><span class="ctrl-val" id="v-cols">4</span></div>
-  <div class="ctrl"><label>Label size</label><input type="range" id="c-label" min="8" max="18" value="12"><span class="ctrl-val" id="v-label">12px</span></div>
+  <div class="ctrl"><label>Font size</label><input type="range" id="c-font" min="16" max="48" value="28"><span class="ctrl-val" id="v-font">28</span></div>
+  <div class="ctrl"><label>Sticker border</label><input type="range" id="c-border" min="0" max="5" value="1.5" step="0.5"><span class="ctrl-val" id="v-border">1.5</span></div>
+  <div class="ctrl"><label>Border radius</label><input type="range" id="c-radius" min="0" max="10" value="2"><span class="ctrl-val" id="v-radius">2</span></div>
+  <div class="ctrl"><label>Sheet border</label><input type="range" id="c-sborder" min="0" max="4" value="1.5" step="0.5"><span class="ctrl-val" id="v-sborder">1.5</span></div>
+  <div class="ctrl"><label>Flag width</label><input type="range" id="c-flagw" min="30" max="80" value="52"><span class="ctrl-val" id="v-flagw">52</span></div>
+  <div class="ctrl"><label>Flag height</label><input type="range" id="c-flagh" min="20" max="60" value="36"><span class="ctrl-val" id="v-flagh">36</span></div>
+  <div class="ctrl"><label>Flag icon</label><input type="range" id="c-flagi" min="14" max="40" value="24"><span class="ctrl-val" id="v-flagi">24</span></div>
+  <div class="ctrl"><label>Sticker gap</label><input type="range" id="c-gap" min="0" max="12" value="4"><span class="ctrl-val" id="v-gap">4</span></div>
+  <div class="ctrl"><label>Sheet gap</label><input type="range" id="c-sgap" min="4" max="30" value="10"><span class="ctrl-val" id="v-sgap">10</span></div>
+  <div class="ctrl"><label>Text pad H</label><input type="range" id="c-padh" min="4" max="24" value="10"><span class="ctrl-val" id="v-padh">10</span></div>
+  <div class="ctrl"><label>Text pad V</label><input type="range" id="c-padv" min="2" max="16" value="5"><span class="ctrl-val" id="v-padv">5</span></div>
+  <div class="ctrl"><label>Cols</label><input type="range" id="c-cols" min="2" max="8" value="4"><span class="ctrl-val" id="v-cols">4</span></div>
+  <div class="ctrl"><label>Label size</label><input type="range" id="c-label" min="8" max="18" value="11"><span class="ctrl-val" id="v-label">11</span></div>
   <div class="ctrl"><label>Border color</label><input type="color" id="c-bcolor" value="#1a1a1a"></div>
+  <div class="ctrl"><label>Preview bg</label>
+    <select id="c-bg">
+      <option value="check">Transparente</option>
+      <option value="#ffffff">Blanco</option>
+      <option value="#4a90d9">Azul</option>
+      <option value="#1a1a1a">Negro</option>
+      <option value="#e8e8e8">Gris claro</option>
+      <option value="#f5c542">Amarillo</option>
+    </select>
+  </div>
 </div>
 
 <div class="canvas-area">
-  <div class="canvas-wrap">
+  <div class="canvas-wrap" id="canvas-wrap">
     <div id="render-area">
     ${ordersData.map(order => `<div class="sheet">
-      <div class="sheet-label"><span class="sheet-name">${order.name}</span><span class="sheet-date">${new Date(order.date).toLocaleDateString()}</span></div>
+      <div class="sheet-label"><span>${order.name}</span><span class="sheet-date">${new Date(order.date).toLocaleDateString()}</span></div>
       <div class="stickers">${order.stickers.map(s => {
         if (s.type === 'flag') {
           if (s.flagCode) return `<div class="s s-flag"><span class="fi fi-${s.flagCode}"></span></div>`;
@@ -203,25 +212,36 @@ body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
 </div>
 
 <script>
-const controls=[
-  {id:'c-font',css:'--font-size',unit:'px',vid:'v-font'},
-  {id:'c-border',css:'--border-w',unit:'px',vid:'v-border'},
-  {id:'c-radius',css:'--border-r',unit:'px',vid:'v-radius'},
-  {id:'c-sborder',css:'--sheet-border',unit:'px',vid:'v-sborder'},
-  {id:'c-flag',css:'--flag-size',unit:'px',vid:'v-flag'},
-  {id:'c-gap',css:'--sticker-gap',unit:'px',vid:'v-gap'},
-  {id:'c-sgap',css:'--sheet-gap',unit:'px',vid:'v-sgap'},
-  {id:'c-padh',css:'--txt-pad-h',unit:'px',vid:'v-padh'},
-  {id:'c-padv',css:'--txt-pad-v',unit:'px',vid:'v-padv'},
-  {id:'c-cols',css:'--cols',unit:'',vid:'v-cols'},
-  {id:'c-label',css:'--label-size',unit:'px',vid:'v-label'},
-];
 const area=document.getElementById('render-area');
-controls.forEach(c=>{
+const wrap=document.getElementById('canvas-wrap');
+
+const ctrls=[
+  {id:'c-font',css:'--font-size',u:'px',v:'v-font'},
+  {id:'c-border',css:'--border-w',u:'px',v:'v-border'},
+  {id:'c-radius',css:'--border-r',u:'px',v:'v-radius'},
+  {id:'c-sborder',css:'--sheet-border',u:'px',v:'v-sborder'},
+  {id:'c-flagw',css:'--flag-w',u:'px',v:'v-flagw'},
+  {id:'c-flagh',css:'--flag-h',u:'px',v:'v-flagh'},
+  {id:'c-flagi',css:'--flag-icon',u:'px',v:'v-flagi'},
+  {id:'c-gap',css:'--sticker-gap',u:'px',v:'v-gap'},
+  {id:'c-sgap',css:'--sheet-gap',u:'px',v:'v-sgap'},
+  {id:'c-padh',css:'--txt-pad-h',u:'px',v:'v-padh'},
+  {id:'c-padv',css:'--txt-pad-v',u:'px',v:'v-padv'},
+  {id:'c-cols',css:'--cols',u:'',v:'v-cols'},
+  {id:'c-label',css:'--label-size',u:'px',v:'v-label'},
+];
+ctrls.forEach(c=>{
   const el=document.getElementById(c.id);if(!el)return;
-  el.addEventListener('input',()=>{area.style.setProperty(c.css,el.value+c.unit);document.getElementById(c.vid).textContent=el.value+c.unit});
+  el.addEventListener('input',()=>{
+    area.style.setProperty(c.css,el.value+c.u);
+    document.getElementById(c.v).textContent=el.value;
+  });
 });
 document.getElementById('c-bcolor')?.addEventListener('input',e=>{area.style.setProperty('--border-color',e.target.value)});
+document.getElementById('c-bg')?.addEventListener('change',e=>{
+  const v=e.target.value;
+  wrap.style.background=v==='check'?'repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 50% / 14px 14px':v;
+});
 document.getElementById('togglePanel')?.addEventListener('click',()=>{document.getElementById('panel').classList.toggle('open')});
 
 document.getElementById('dlPng')?.addEventListener('click',async()=>{
