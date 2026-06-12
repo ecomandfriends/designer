@@ -141,11 +141,11 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
 .sheet-label{margin-bottom:4px;font-family:'Poppins',sans-serif;font-size:var(--label-size,11px);font-weight:400;color:#1a1a1a;display:flex;justify-content:space-between;gap:12px}
 .sheet-date{font-size:7px;color:#999}
 .stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px)}
-.s{border:var(--border-w,1.5px) solid var(--border-color,#1a1a1a);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.s{border:var(--border-w,0px) solid var(--border-color,#1a1a1a);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .s-txt{font-family:'Teko',sans-serif;font-size:var(--font-size,28px);font-weight:700;line-height:var(--line-h,1.15);padding:var(--txt-pad-v,5px) var(--txt-pad-h,10px);white-space:nowrap}
 .s-txt.black{color:#1a1a1a}.s-txt.white{color:#fff}
 .s-flag{width:var(--flag-w,52px);height:var(--flag-h,36px);padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.s-flag img{width:100%;height:100%;object-fit:cover;display:block}
+.s-flag img{width:calc(100% - 8px);height:calc(100% - 8px);object-fit:contain;display:block;margin:auto}
 .s-icon{width:var(--flag-w,52px);height:var(--flag-h,36px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-h,36px)*0.55)}
 .s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:80px;text-align:center;color:#888;font-style:italic}
 
@@ -177,7 +177,7 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
 <div class="panel" id="panel">
   <div class="ctrl"><label>Font size</label><input type="range" id="c-font" min="16" max="48" value="28"><span class="ctrl-val" id="v-font">28</span></div>
   <div class="ctrl"><label>Line height</label><input type="range" id="c-lh" min="0.8" max="1.8" value="1.15" step="0.05"><span class="ctrl-val" id="v-lh">1.15</span></div>
-  <div class="ctrl"><label>Sticker border</label><input type="range" id="c-border" min="0" max="5" value="1.5" step="0.5"><span class="ctrl-val" id="v-border">1.5</span></div>
+  <div class="ctrl"><label>Sticker border</label><input type="range" id="c-border" min="0" max="5" value="0" step="0.5"><span class="ctrl-val" id="v-border">0</span></div>
   <div class="ctrl"><label>Radius</label><input type="range" id="c-radius" min="0" max="10" value="2"><span class="ctrl-val" id="v-radius">2</span></div>
   <div class="ctrl"><label>Sheet border</label><input type="range" id="c-sborder" min="0" max="4" value="1.5" step="0.5"><span class="ctrl-val" id="v-sborder">1.5</span></div>
   <div class="ctrl"><label>Flag W</label><input type="range" id="c-flagw" min="30" max="80" value="52"><span class="ctrl-val" id="v-flagw">52</span></div>
