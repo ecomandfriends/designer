@@ -144,7 +144,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
 .s-txt.white{color:#ffffff}
 
 .s-flag{width:var(--flag-size,44px);height:var(--flag-size,44px);padding:0;display:flex;align-items:center;justify-content:center}
-.s-flag .fi{font-size:calc(var(--flag-size,44px) * 0.6);line-height:1}
+.s-flag{width:var(--flag-size,56px);height:calc(var(--flag-size,56px) * 0.7);
 
 .s-icon{width:var(--flag-size,44px);height:var(--flag-size,44px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-size,44px) * 0.55)}
 
@@ -190,7 +190,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f0f0;color:#1a1a1a}
       <div class="sheet-label"><span class="sheet-name">${order.name}</span><span class="sheet-date">${new Date(order.date).toLocaleDateString()}</span></div>
       <div class="stickers">${order.stickers.map(s => {
         if (s.type === 'flag') {
-          if (s.flagCode) return `<div class="s s-flag"><span class="fi fi-${s.flagCode} fis"></span></div>`;
+          if (s.flagCode) return `<div class="s s-flag"><span class="fi fi-${s.flagCode}"></span></div>`;
           return `<div class="s s-icon">🏳️</div>`;
         }
         if (s.type === 'icon') return `<div class="s s-icon">${s.value}</div>`;
