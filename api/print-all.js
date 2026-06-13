@@ -150,7 +150,7 @@ body{font-family:'Poppins',sans-serif;background:#e8e8e8;color:#1a1a1a}
 .s-custom{font-family:'Poppins',sans-serif;font-size:7px;padding:4px 6px;max-width:80px;text-align:center;color:#888;font-style:italic}
 
 /* CSS FLAGS */
-.css-flag{width:100%;height:100%;position:relative}
+.css-flag{width:calc(100% - 8px);height:calc(100% - 8px);position:relative;margin:auto;border-radius:1px}
 .eng{background:#fff}
 .eng-h{position:absolute;top:50%;left:0;right:0;height:22%;background:#CE1124;transform:translateY(-50%)}
 .eng-v{position:absolute;left:50%;top:0;bottom:0;width:18%;background:#CE1124;transform:translateX(-50%)}
