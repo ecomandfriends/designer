@@ -7,7 +7,8 @@ module.exports = async (req, res) => {
   const auth = authCheck(token);
   if (!auth) return res.status(401).json({ error: 'Not authorized' });
 
-  const { orderIds, shopId, tag } = JSON.parse(req.body || '{}');
+const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+const { orderIds, shopId, tag } = body;
   if (!orderIds || !orderIds.length || !shopId) return res.status(400).json({ error: 'Missing orderIds or shopId' });
 
   const shops = getShops();
