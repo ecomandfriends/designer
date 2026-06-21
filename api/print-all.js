@@ -160,6 +160,10 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .s-custom{font-family:'Poppins',sans-serif;font-size:9px;padding:4px 8px;max-width:90px;text-align:center;color:#a1a1aa;font-style:italic}
 .css-flag{width:calc(100% - 8px);height:calc(100% - 8px);position:relative;margin:auto;border-radius:1px;overflow:hidden}
 .eng{background:#fff}.eng-h{position:absolute;top:50%;left:0;right:0;height:22%;background:#CE1124;transform:translateY(-50%)}.eng-v{position:absolute;left:50%;top:0;bottom:0;width:18%;background:#CE1124;transform:translateX(-50%)}
+.sct{background:#005EB8;overflow:hidden}
+.sct-1,.sct-2{position:absolute;top:50%;left:50%;width:150%;height:18%;background:#fff}
+.sct-1{transform:translate(-50%,-50%) rotate(33deg)}
+.sct-2{transform:translate(-50%,-50%) rotate(-33deg)}
 .wls{display:flex;flex-direction:column;height:100%}.wls-t{flex:1;background:#fff}.wls-b{flex:1;background:#00AB39}
 .empty-msg{padding:40px;color:#d4d4d8;font-size:14px;text-align:center}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:12px 28px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
@@ -243,7 +247,7 @@ function toast(msg,ms=3000){const t=document.getElementById('toast');t.textConte
 function flagHTML(code){
   if(!code)return'<div class="s s-icon">🏳️</div>';
   if(code==='gb-eng')return'<div class="s s-flag"><div class="css-flag eng"><div class="eng-h"></div><div class="eng-v"></div></div></div>';
-  if(code==='gb-sct')return'<div class="s s-flag"><img src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 5 3%27%3E%3Crect width=%275%27 height=%273%27 fill=%27%23005EB8%27/%3E%3Cpath d=%27M0,0L5,3M5,0L0,3%27 stroke=%27white%27 stroke-width=%27.6%27/%3E%3C/svg%3E" alt=""></div>';
+if(code==='gb-sct')return'<div class="s s-flag"><div class="css-flag sct"><div class="sct-1"></div><div class="sct-2"></div></div></div>';
   if(code==='gb-wls')return'<div class="s s-flag"><div class="css-flag wls"><div class="wls-t"></div><div class="wls-b"></div></div></div>';
   return'<div class="s s-flag"><img src="https://flagcdn.com/w320/'+code+'.png" crossorigin="anonymous" alt=""></div>';
 }
