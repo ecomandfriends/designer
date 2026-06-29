@@ -46,23 +46,43 @@ module.exports = async (req, res) => {
         return null;
       }
       shopOrders.forEach(order => {
-        const stickers = (order.line_items || []).filter(li => (li.properties || []).some(p => p.name === '_sticker' && p.value === 'true')).map(li => {
-          const ps = li.properties || [];
-          const tipo = getProp(ps, 'Tipo', 'Type');
-          const diseno = getProp(ps, 'Diseño', 'Design');
-          const colorProp = getProp(ps, 'Color', 'Colour');
-          let type = 'text';
-          if (/bandera|flag/i.test(tipo)) type = 'flag';
-          else if (/n[uú]mero|number|fecha|date|dorsal/i.test(tipo)) type = 'number';
-          else if (/icon/i.test(tipo)) type = 'icon';
-          else if (/personal|custom/i.test(tipo)) type = 'custom';
-          const isWhite = /blanco|white/i.test(colorProp);
-          const value = diseno || li.variant_title || '';
-          const flagCode = type === 'flag' ? flagToCode(value) : null;
-          const items = [];
-          for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value, isWhite, flagCode });
-          return items;
-        }).flat();
+  const stickers = (order.line_items || []).map(li => {
+  const ps = li.properties || [];
+  const isSticker = ps.some(p => p.name === '_sticker' && p.value === 'true');
+  const isPack = ps.some(p => p.name === '_wc_pack' && p.value === 'true');
+  if (!isSticker && !isPack) return [];
+
+  const colorProp = getProp(ps, 'Color', 'Colour');
+  const isWhite = /blanco|white/i.test(colorProp);
+  const items = [];
+
+  if (isPack) {
+    ps.filter(p => /^Sticker \d+$/i.test(p.name)).forEach(sp => {
+      const m = sp.value.match(/^(\w+):\s*(.+?)\s*[×x](\d+)$/i);
+      if (!m) return;
+      const [, tipo, val, qty] = m;
+      let type = 'text';
+      if (/flag/i.test(tipo)) type = 'flag';
+      else if (/number/i.test(tipo)) type = 'number';
+      else if (/icon/i.test(tipo)) type = 'icon';
+      const flagCode = type === 'flag' ? flagToCode(val.trim()) : null;
+      const q = parseInt(qty) || 1;
+      for (let i = 0; i < q; i++) items.push({ type, value: val.trim(), isWhite, flagCode });
+    });
+  } else {
+    const tipo = getProp(ps, 'Tipo', 'Type');
+    const diseno = getProp(ps, 'Diseño', 'Design');
+    let type = 'text';
+    if (/bandera|flag/i.test(tipo)) type = 'flag';
+    else if (/n[uú]mero|number|fecha|date|dorsal/i.test(tipo)) type = 'number';
+    else if (/icon/i.test(tipo)) type = 'icon';
+    else if (/personal|custom/i.test(tipo)) type = 'custom';
+    const value = diseno || li.variant_title || '';
+    const flagCode = type === 'flag' ? flagToCode(value) : null;
+    for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value, isWhite, flagCode });
+  }
+  return items;
+}).flat();
         if (stickers.length > 0) {
           allOrdersData.push({ id: order.id, name: order.name, date: order.created_at, fulfillment: order.fulfillment_status || 'unfulfilled', shopId: shop.id, shopName: shop.name, shopColor: color, printed: (order.tags || '').split(',').map(t => t.trim()).includes('printed'), stickers });
         }
