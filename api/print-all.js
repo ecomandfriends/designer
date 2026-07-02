@@ -33,11 +33,9 @@ module.exports = async (req, res) => {
       function getProp(ps, ...names) { for (const n of names) { const p = ps.find(p => p.name.toLowerCase() === n.toLowerCase()); if (p) return p.value; } return ''; }
       function flagToCode(val) {
         if (!val) return null;
-        const ris = [];
-        for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0x1F1E6 && cp <= 0x1F1FF) ris.push(cp); }
+        const ris = [];for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0x1F1E6 && cp <= 0x1F1FF) ris.push(cp); }
         if (ris.length === 2) return String.fromCharCode(ris[0] - 0x1F1E6 + 65, ris[1] - 0x1F1E6 + 65).toLowerCase();
-        const tags = [];
-        for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0xE0061 && cp <= 0xE007A) tags.push(String.fromCharCode(cp - 0xE0061 + 97)); }
+        const tags = [];for (const ch of val) { const cp = ch.codePointAt(0); if (cp >= 0xE0061 && cp <= 0xE007A) tags.push(String.fromCharCode(cp - 0xE0061 + 97)); }
         if (tags.length >= 4) { const c = tags.join(''); return c.substring(0, 2) + '-' + c.substring(2); }
         const clean = val.replace(/[^\w\sáéíóúñü]/g, '').trim().toLowerCase();
         const map = {'spain':'es','españa':'es','italy':'it','england':'gb-eng','scotland':'gb-sct','wales':'gb-wls','uk':'gb','united kingdom':'gb','great britain':'gb','germany':'de','france':'fr','portugal':'pt','belgium':'be','netherlands':'nl','poland':'pl','croatia':'hr','austria':'at','switzerland':'ch','sweden':'se','norway':'no','denmark':'dk','finland':'fi','greece':'gr','ireland':'ie','czech republic':'cz','romania':'ro','ukraine':'ua','russia':'ru','serbia':'rs','slovakia':'sk','hungary':'hu','bulgaria':'bg','usa':'us','united states':'us','brazil':'br','brasil':'br','argentina':'ar','mexico':'mx','colombia':'co','chile':'cl','peru':'pe','venezuela':'ve','ecuador':'ec','uruguay':'uy','canada':'ca','costa rica':'cr','panama':'pa','cuba':'cu','jamaica':'jm','morocco':'ma','senegal':'sn','nigeria':'ng','south africa':'za','egypt':'eg','cameroon':'cm','ghana':'gh','kenya':'ke','angola':'ao','japan':'jp','south korea':'kr','china':'cn','india':'in','turkey':'tr','saudi arabia':'sa','uae':'ae','israel':'il','indonesia':'id','philippines':'ph','thailand':'th','vietnam':'vn','australia':'au','new zealand':'nz','pakistan':'pk','albania':'al','bosnia':'ba','slovenia':'si'};
@@ -46,43 +44,41 @@ module.exports = async (req, res) => {
         return null;
       }
       shopOrders.forEach(order => {
-  const stickers = (order.line_items || []).map(li => {
-  const ps = li.properties || [];
-  const isSticker = ps.some(p => p.name === '_sticker' && p.value === 'true');
-  const isPack = ps.some(p => p.name === '_wc_pack' && p.value === 'true');
-  if (!isSticker && !isPack) return [];
-
-  const colorProp = getProp(ps, 'Color', 'Colour');
-  const isWhite = /blanco|white/i.test(colorProp);
-  const items = [];
-
-  if (isPack) {
-    ps.filter(p => /^Sticker \d+$/i.test(p.name)).forEach(sp => {
-      const m = sp.value.match(/^(\w+):\s*(.+?)\s*[×x](\d+)$/i);
-      if (!m) return;
-      const [, tipo, val, qty] = m;
-      let type = 'text';
-      if (/flag/i.test(tipo)) type = 'flag';
-      else if (/number/i.test(tipo)) type = 'number';
-      else if (/icon/i.test(tipo)) type = 'icon';
-      const flagCode = type === 'flag' ? flagToCode(val.trim()) : null;
-      const q = parseInt(qty) || 1;
-      for (let i = 0; i < q; i++) items.push({ type, value: val.trim(), isWhite, flagCode });
-    });
-  } else {
-    const tipo = getProp(ps, 'Tipo', 'Type');
-    const diseno = getProp(ps, 'Diseño', 'Design');
-    let type = 'text';
-    if (/bandera|flag/i.test(tipo)) type = 'flag';
-    else if (/n[uú]mero|number|fecha|date|dorsal/i.test(tipo)) type = 'number';
-    else if (/icon/i.test(tipo)) type = 'icon';
-    else if (/personal|custom/i.test(tipo)) type = 'custom';
-    const value = diseno || li.variant_title || '';
-    const flagCode = type === 'flag' ? flagToCode(value) : null;
-    for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value, isWhite, flagCode });
-  }
-  return items;
-}).flat();
+        const allPs = order.line_items || [];
+        const stickers = allPs.map(li => {
+          const ps = li.properties || [];
+          const isSticker = ps.some(p => p.name === '_sticker' && p.value === 'true');
+          const isPack = ps.some(p => p.name === '_wc_pack' && p.value === 'true');
+          if (!isSticker && !isPack) return [];
+          const colorProp = getProp(ps, 'Color', 'Colour');
+          const isWhite = /blanco|white/i.test(colorProp);
+          const items = [];
+          if (isPack) {
+            ps.filter(p => /^Sticker \d+$/i.test(p.name)).forEach(sp => {
+              const m = sp.value.match(/^(\w+):\s*(.+?)\s*[×x](\d+)$/i);
+              if (!m) return;
+              const [, tipo, val, qty] = m;
+              let type = 'text';
+              if (/flag/i.test(tipo)) type = 'flag';
+              else if (/number/i.test(tipo)) type = 'number';
+              else if (/icon/i.test(tipo)) type = 'icon';
+              const fc = type === 'flag' ? flagToCode(val.trim()) : null;
+              for (let i = 0; i < (parseInt(qty) || 1); i++) items.push({ type, value: val.trim(), isWhite, flagCode: fc });
+            });
+          } else {
+            const tipo = getProp(ps, 'Tipo', 'Type');
+            const diseno = getProp(ps, 'Diseño', 'Design');
+            let type = 'text';
+            if (/bandera|flag/i.test(tipo)) type = 'flag';
+            else if (/n[uú]mero|number|fecha|date|dorsal/i.test(tipo)) type = 'number';
+            else if (/icon/i.test(tipo)) type = 'icon';
+            else if (/personal|custom/i.test(tipo)) type = 'custom';
+            const value = diseno || li.variant_title || '';
+            const fc = type === 'flag' ? flagToCode(value) : null;
+            for (let i = 0; i < (li.quantity || 1); i++) items.push({ type, value, isWhite, flagCode: fc });
+          }
+          return items;
+        }).flat();
         if (stickers.length > 0) {
           allOrdersData.push({ id: order.id, name: order.name, date: order.created_at, fulfillment: order.fulfillment_status || 'unfulfilled', shopId: shop.id, shopName: shop.name, shopColor: color, printed: (order.tags || '').split(',').map(t => t.trim()).includes('printed'), stickers });
         }
@@ -98,8 +94,6 @@ module.exports = async (req, res) => {
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-
-/* TOOLBAR */
 .toolbar{background:#fff;border-bottom:1px solid #e4e4e7;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;flex-shrink:0}
 .toolbar-left{display:flex;align-items:center;gap:12px}
 .toolbar-title{font-family:'Teko',sans-serif;font-size:22px;font-weight:700}
@@ -110,21 +104,14 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .tbtn-dk{background:#18181b;color:#fff;border-color:#18181b}
 .tbtn-green{background:#16a34a;color:#fff;border-color:#16a34a}
 .tbtn:disabled{opacity:.4;cursor:not-allowed}
-
-/* PANEL */
 .panel{background:#fff;border-bottom:1px solid #e4e4e7;padding:10px 20px;display:none;flex-wrap:wrap;gap:14px;align-items:center;flex-shrink:0}
 .panel.open{display:flex}
 .ctrl{display:flex;flex-direction:column;gap:3px}
 .ctrl label{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#a1a1aa;font-weight:600}
 .ctrl input[type=range]{width:90px;accent-color:#18181b}
 .ctrl-val{font-size:10px;color:#71717a;font-family:'Teko',sans-serif;font-weight:700}
-
 .main{flex:1;display:flex;overflow:hidden}
-
-/* SIDEBAR */
 .sidebar{width:280px;background:#fff;border-right:1px solid #e4e4e7;display:flex;flex-direction:column;flex-shrink:0}
-
-/* Shop tabs */
 .shop-tabs{display:flex;border-bottom:1px solid #e4e4e7;flex-shrink:0}
 .shop-tab{flex:1;padding:10px 8px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;background:#fff}
 .shop-tab:hover{background:#fafafa}
@@ -132,21 +119,14 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .shop-tab-name{font-size:12px;font-weight:700;color:#18181b;display:block}
 .shop-tab-counts{font-size:10px;color:#a1a1aa;margin-top:2px}
 .shop-tab-pending{color:#92400e;font-weight:700}
-
-/* Filters */
 .sidebar-filters{padding:8px 14px;border-bottom:1px solid #f4f4f5;display:flex;gap:6px;flex-shrink:0}
 .fbtn{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid #e4e4e7;background:#fff;color:#71717a;cursor:pointer;font-weight:600;transition:all .1s}
 .fbtn:hover{border-color:#a1a1aa}
 .fbtn.active{background:#18181b;color:#fff;border-color:#18181b}
-.fbtn-count{font-size:9px;margin-left:3px;opacity:.7}
-
-/* Select buttons */
 .sidebar-actions{padding:6px 14px;border-bottom:1px solid #f4f4f5;display:flex;gap:6px;justify-content:flex-end;flex-shrink:0}
 .sabtn{font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid #e4e4e7;background:#fff;color:#71717a;cursor:pointer;font-weight:600}
 .sabtn:hover{border-color:#a1a1aa}
-
 .sidebar-list{flex:1;overflow-y:auto}
-
 .sidebar-item{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #fafafa;cursor:pointer;transition:all .1s}
 .sidebar-item:hover{background:#fafafa}
 .sidebar-item.is-printed{opacity:.4}
@@ -161,17 +141,14 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .badge-fulfilled{background:#dcfce7;color:#166534}
 .badge-printed{background:#e0e7ff;color:#3730a3}
 .sidebar-sticker-count{font-size:11px;color:#d4d4d8;flex-shrink:0;font-weight:700;font-family:'Teko',sans-serif}
-
-/* CANVAS */
 .canvas-area{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
 .canvas-wrap{background:var(--preview-bg,repeating-conic-gradient(#e4e4e7 0% 25%,#fff 0% 50%) 50% / 14px 14px);padding:12px;border-radius:8px;border:1px solid #d4d4d8;display:inline-block;min-height:100px}
 #render-area{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,10px);align-items:flex-start}
-
 .sheet{border:var(--sheet-border,1.5px) solid #18181b;border-radius:4px;padding:6px;display:inline-block}
 .sheet-label{margin-bottom:4px;font-family:'Poppins',sans-serif;font-size:var(--label-size,12px);font-weight:400;color:#18181b}
 .stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px)}
-
-.s{border:var(--border-w,0px) solid var(--border-color,#18181b);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.s{border:var(--border-w,0px) solid var(--border-color,#18181b);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:outline .1s}
+.s:hover{outline:2px solid #2563eb;outline-offset:1px}
 .s-txt{font-family:'Teko',sans-serif;font-size:var(--font-size,28px);font-weight:700;line-height:var(--line-h,1.15);padding:var(--txt-pad-v,5px) var(--txt-pad-h,10px);white-space:nowrap}
 .s-txt.black{color:#18181b}.s-txt.white{color:#fff}
 .s-flag{width:var(--flag-w,52px);height:var(--flag-h,36px);padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -189,7 +166,23 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:12px 28px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .toast.show{display:block;animation:fadeUp .3s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@media print{.toolbar,.panel,.sidebar,.toast{display:none!important}.main{display:block}.canvas-area{padding:0}.canvas-wrap{background:none!important;border:none;padding:0}}
+.ep-overlay{position:fixed;inset:0;z-index:199;display:none}
+.ep-overlay.open{display:block}
+.editor-popup{position:fixed;z-index:200;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.18);padding:16px;width:250px;display:none}
+.editor-popup.open{display:block}
+.editor-popup h4{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.editor-popup .ep-close{background:none;border:none;font-size:18px;cursor:pointer;color:#999}
+.ep-row{margin-bottom:10px}
+.ep-row label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;font-weight:600;display:block;margin-bottom:4px}
+.ep-row input,.ep-row select{width:100%;padding:7px 10px;border:1px solid #e4e4e7;border-radius:6px;font-size:13px;font-family:'Poppins',sans-serif}
+.ep-row input:focus,.ep-row select:focus{outline:none;border-color:#2563eb}
+.ep-actions{display:flex;gap:8px;margin-top:14px}
+.ep-btn{flex:1;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:8px;border-radius:6px;border:none;cursor:pointer;transition:all .15s}
+.ep-save{background:#18181b;color:#fff}
+.ep-save:hover{background:#27272a}
+.ep-del{background:#fee2e2;color:#dc2626}
+.ep-del:hover{background:#fecaca}
+@media print{.toolbar,.panel,.sidebar,.toast,.ep-overlay,.editor-popup{display:none!important}.main{display:block}.canvas-area{padding:0}.canvas-wrap{background:none!important;border:none;padding:0}.s{cursor:default}.s:hover{outline:none}}
 </style>
 </head><body>
 <div class="toolbar">
@@ -246,6 +239,17 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
     </div>
   </div>
 </div>
+<div class="ep-overlay" id="ep-overlay"></div>
+<div class="editor-popup" id="editor-popup">
+  <h4>Editar sticker <button class="ep-close" id="ep-close">✕</button></h4>
+  <div class="ep-row"><label>Tipo</label><select id="ep-type"><option value="text">Texto</option><option value="number">Número</option><option value="flag">Bandera</option><option value="icon">Icono</option><option value="custom">Custom</option></select></div>
+  <div class="ep-row"><label>Valor</label><input type="text" id="ep-value" placeholder="PEDRO"></div>
+  <div class="ep-row"><label>Color texto</label><select id="ep-color"><option value="black">Negro</option><option value="white">Blanco</option></select></div>
+  <div class="ep-actions">
+    <button class="ep-btn ep-save" id="ep-save">Guardar</button>
+    <button class="ep-btn ep-del" id="ep-del">Eliminar</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -253,10 +257,8 @@ const DATA=${JSON.stringify(allOrdersData)};
 const SHOPS=${JSON.stringify(shopList)};
 const TOKEN='${token}';
 const selected=new Set();
-let filter='all';
-let shopFilter='all';
+let filter='all';let shopFilter='all';
 DATA.forEach((o,i)=>{if(!o.printed)selected.add(i)});
-
 const area=document.getElementById('render-area');
 const wrap=document.getElementById('canvas-wrap');
 const list=document.getElementById('sidebar-list');
@@ -264,18 +266,32 @@ const PRINT_W_PX=Math.round(580*300/25.4);
 
 function toast(msg,ms=3000){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show';setTimeout(()=>{t.className='toast'},ms)}
 
-function flagHTML(code){
-  if(!code)return'<div class="s s-icon">🏳️</div>';
-  if(code==='gb-eng')return'<div class="s s-flag"><div class="css-flag eng"><div class="eng-h"></div><div class="eng-v"></div></div></div>';
-if(code==='gb-sct')return'<div class="s s-flag"><div class="css-flag sct"><div class="sct-1"></div><div class="sct-2"></div></div></div>';
-  if(code==='gb-wls')return'<div class="s s-flag"><div class="css-flag wls"><div class="wls-t"></div><div class="wls-b"></div></div></div>';
-  return'<div class="s s-flag"><img src="https://flagcdn.com/w320/'+code+'.png" crossorigin="anonymous" alt=""></div>';
+function flagToCode(val){
+  if(!val)return null;
+  const ris=[];for(const ch of val){const cp=ch.codePointAt(0);if(cp>=0x1F1E6&&cp<=0x1F1FF)ris.push(cp)}
+  if(ris.length===2)return String.fromCharCode(ris[0]-0x1F1E6+65,ris[1]-0x1F1E6+65).toLowerCase();
+  const tags=[];for(const ch of val){const cp=ch.codePointAt(0);if(cp>=0xE0061&&cp<=0xE007A)tags.push(String.fromCharCode(cp-0xE0061+97))}
+  if(tags.length>=4){const c=tags.join('');return c.substring(0,2)+'-'+c.substring(2)}
+  const clean=val.replace(/[^\\w\\s]/g,'').trim().toLowerCase();
+  const map={'england':'gb-eng','scotland':'gb-sct','wales':'gb-wls','uk':'gb','united kingdom':'gb','spain':'es','france':'fr','germany':'de','portugal':'pt','belgium':'be','netherlands':'nl','poland':'pl','ireland':'ie','brazil':'br','argentina':'ar','usa':'us','italy':'it','croatia':'hr','austria':'at','switzerland':'ch','sweden':'se','norway':'no','denmark':'dk','australia':'au','japan':'jp','south korea':'kr','mexico':'mx','colombia':'co','canada':'ca','nigeria':'ng','ghana':'gh','cameroon':'cm','senegal':'sn','morocco':'ma','south africa':'za','egypt':'eg','angola':'ao','jamaica':'jm','turkey':'tr','india':'in','china':'cn'};
+  if(map[clean])return map[clean];
+  for(const[n,c]of Object.entries(map)){if(clean.includes(n)||n.includes(clean))return c}
+  return null;
 }
-function stickerHTML(s){
-  if(s.type==='flag')return flagHTML(s.flagCode);
-  if(s.type==='icon')return'<div class="s s-icon">'+s.value+'</div>';
-  if(s.type==='custom')return'<div class="s"><span class="s-custom">✨ '+(s.value.length>25?s.value.substring(0,25)+'…':s.value)+'</span></div>';
-  return'<div class="s"><span class="s-txt '+(s.isWhite?'white':'black')+'">'+s.value+'</span></div>';
+
+function flagHTML(code,tag){
+  if(!code)return'<div class="s s-icon"'+tag+'>🏳️</div>';
+  if(code==='gb-eng')return'<div class="s s-flag"'+tag+'><div class="css-flag eng"><div class="eng-h"></div><div class="eng-v"></div></div></div>';
+  if(code==='gb-sct')return'<div class="s s-flag"'+tag+'><div class="css-flag sct"><div class="sct-1"></div><div class="sct-2"></div></div></div>';
+  if(code==='gb-wls')return'<div class="s s-flag"'+tag+'><div class="css-flag wls"><div class="wls-t"></div><div class="wls-b"></div></div></div>';
+  return'<div class="s s-flag"'+tag+'><img src="https://flagcdn.com/w320/'+code+'.png" crossorigin="anonymous" alt=""></div>';
+}
+function stickerHTML(s,oi,si){
+  const tag=' data-oi="'+oi+'" data-si="'+si+'"';
+  if(s.type==='flag')return flagHTML(s.flagCode,tag);
+  if(s.type==='icon')return'<div class="s s-icon"'+tag+'>'+s.value+'</div>';
+  if(s.type==='custom')return'<div class="s"'+tag+'><span class="s-custom">✨ '+(s.value.length>25?s.value.substring(0,25)+'…':s.value)+'</span></div>';
+  return'<div class="s"'+tag+'><span class="s-txt '+(s.isWhite?'white':'black')+'">'+s.value+'</span></div>';
 }
 
 function visibleIndices(){
@@ -287,69 +303,31 @@ function visibleIndices(){
     return true;
   });
 }
-
 function renderSidebar(){
   const visible=visibleIndices();
   list.innerHTML=visible.map(i=>{
     const o=DATA[i];const on=selected.has(i);
-    return'<div class="sidebar-item'+(o.printed?' is-printed':'')+'" data-i="'+i+'">'+
-      '<div class="sidebar-chk'+(on?' on':'')+'">'+(on?'✓':'')+'</div>'+
-      '<div class="sidebar-order-info">'+
-        '<div class="sidebar-order-name">'+o.name+'</div>'+
-        '<div class="sidebar-order-meta">'+
-          (o.printed?'<span class="badge badge-printed">Impreso</span>':
-           o.fulfillment==='fulfilled'?'<span class="badge badge-fulfilled">Enviado</span>':
-           '<span class="badge badge-pending">Pendiente</span>')+
-          (shopFilter==='all'&&SHOPS.length>1?'<span style="font-size:8px;color:'+o.shopColor+';font-weight:600">'+o.shopName.substring(0,10)+'</span>':'')+
-        '</div>'+
-      '</div>'+
-      '<span class="sidebar-sticker-count">'+o.stickers.length+'</span>'+
-    '</div>';
+    return'<div class="sidebar-item'+(o.printed?' is-printed':'')+'" data-i="'+i+'"><div class="sidebar-chk'+(on?' on':'')+'">'+(on?'✓':'')+'</div><div class="sidebar-order-info"><div class="sidebar-order-name">'+o.name+'</div><div class="sidebar-order-meta">'+(o.printed?'<span class="badge badge-printed">Impreso</span>':o.fulfillment==='fulfilled'?'<span class="badge badge-fulfilled">Enviado</span>':'<span class="badge badge-pending">Pendiente</span>')+(shopFilter==='all'&&SHOPS.length>1?'<span style="font-size:8px;color:'+o.shopColor+';font-weight:600">'+o.shopName.substring(0,12)+'</span>':'')+'</div></div><span class="sidebar-sticker-count">'+o.stickers.length+'</span></div>';
   }).join('');
-  list.querySelectorAll('.sidebar-item').forEach(el=>{
-    el.addEventListener('click',()=>{const i=+el.dataset.i;selected.has(i)?selected.delete(i):selected.add(i);renderSidebar();renderSheets()});
-  });
+  list.querySelectorAll('.sidebar-item').forEach(el=>{el.addEventListener('click',()=>{const i=+el.dataset.i;selected.has(i)?selected.delete(i):selected.add(i);renderSidebar();renderSheets()})});
 }
-
 function renderSheets(){
   const sel=[...selected].sort().filter(i=>visibleIndices().includes(i));
   document.getElementById('sel-info').textContent=sel.length+' seleccionados · '+sel.reduce((s,i)=>s+DATA[i].stickers.length,0)+' stickers';
   if(!sel.length){area.innerHTML='<div class="empty-msg">Selecciona pedidos del panel izquierdo</div>';return}
   area.innerHTML=sel.map(i=>{
     const o=DATA[i];
-    return'<div class="sheet"><div class="sheet-label">'+o.name+'</div><div class="stickers">'+o.stickers.map(stickerHTML).join('')+'</div></div>';
+    return'<div class="sheet"><div class="sheet-label">'+o.name+'</div><div class="stickers">'+o.stickers.map((s,j)=>stickerHTML(s,i,j)).join('')+'</div></div>';
   }).join('');
+  bindStickerClicks();
 }
 
 // Shop tabs
-document.querySelectorAll('.shop-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    shopFilter=tab.dataset.shopfilter;
-    renderSidebar();renderSheets();
-  });
-});
-
+document.querySelectorAll('.shop-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');shopFilter=tab.dataset.shopfilter;renderSidebar();renderSheets()})});
 // Filters
-document.querySelectorAll('.fbtn[data-filter]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.fbtn[data-filter]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');filter=btn.dataset.filter;
-    renderSidebar();renderSheets();
-  });
-});
-
+document.querySelectorAll('.fbtn[data-filter]').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.fbtn[data-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');filter=btn.dataset.filter;renderSidebar();renderSheets()})});
 // Controls
-const ctrls=[
-  {id:'c-font',css:'--font-size',u:'px',v:'v-font'},{id:'c-lh',css:'--line-h',u:'',v:'v-lh'},
-  {id:'c-border',css:'--border-w',u:'px',v:'v-border'},{id:'c-radius',css:'--border-r',u:'px',v:'v-radius'},
-  {id:'c-sborder',css:'--sheet-border',u:'px',v:'v-sborder'},
-  {id:'c-flagw',css:'--flag-w',u:'px',v:'v-flagw'},{id:'c-flagh',css:'--flag-h',u:'px',v:'v-flagh'},
-  {id:'c-gap',css:'--sticker-gap',u:'px',v:'v-gap'},{id:'c-sgap',css:'--sheet-gap',u:'px',v:'v-sgap'},
-  {id:'c-padh',css:'--txt-pad-h',u:'px',v:'v-padh'},{id:'c-padv',css:'--txt-pad-v',u:'px',v:'v-padv'},
-  {id:'c-cols',css:'--cols',u:'',v:'v-cols'},{id:'c-label',css:'--label-size',u:'px',v:'v-label'},
-];
+const ctrls=[{id:'c-font',css:'--font-size',u:'px',v:'v-font'},{id:'c-lh',css:'--line-h',u:'',v:'v-lh'},{id:'c-border',css:'--border-w',u:'px',v:'v-border'},{id:'c-radius',css:'--border-r',u:'px',v:'v-radius'},{id:'c-sborder',css:'--sheet-border',u:'px',v:'v-sborder'},{id:'c-flagw',css:'--flag-w',u:'px',v:'v-flagw'},{id:'c-flagh',css:'--flag-h',u:'px',v:'v-flagh'},{id:'c-gap',css:'--sticker-gap',u:'px',v:'v-gap'},{id:'c-sgap',css:'--sheet-gap',u:'px',v:'v-sgap'},{id:'c-padh',css:'--txt-pad-h',u:'px',v:'v-padh'},{id:'c-padv',css:'--txt-pad-v',u:'px',v:'v-padv'},{id:'c-cols',css:'--cols',u:'',v:'v-cols'},{id:'c-label',css:'--label-size',u:'px',v:'v-label'}];
 ctrls.forEach(c=>{const el=document.getElementById(c.id);if(!el)return;el.addEventListener('input',()=>{area.style.setProperty(c.css,el.value+c.u);document.getElementById(c.v).textContent=el.value})});
 document.getElementById('c-bcolor')?.addEventListener('input',e=>{area.style.setProperty('--border-color',e.target.value)});
 document.getElementById('c-bg')?.addEventListener('change',e=>{wrap.style.background=e.target.value==='check'?'repeating-conic-gradient(#e4e4e7 0% 25%,#fff 0% 50%) 50% / 14px 14px':e.target.value});
@@ -372,6 +350,43 @@ document.getElementById('tagBtn')?.addEventListener('click',async()=>{
   toast('✓ '+ok+' marcados como impresos'+(fail?' ('+fail+' fallaron)':''));
   btn.textContent='🏷 Marcar impresos';btn.disabled=false;
   renderSidebar();renderSheets();
+});
+
+// Sticker editor
+let editOi=null,editSi=null;
+const popup=document.getElementById('editor-popup');
+const epOverlay=document.getElementById('ep-overlay');
+function openEditor(oi,si,rect){
+  editOi=oi;editSi=si;
+  const s=DATA[oi].stickers[si];
+  document.getElementById('ep-type').value=s.type;
+  document.getElementById('ep-value').value=s.value;
+  document.getElementById('ep-color').value=s.isWhite?'white':'black';
+  popup.style.top=Math.min(rect.bottom+8,window.innerHeight-300)+'px';
+  popup.style.left=Math.min(rect.left,window.innerWidth-270)+'px';
+  popup.classList.add('open');epOverlay.classList.add('open');
+}
+function closeEditor(){popup.classList.remove('open');epOverlay.classList.remove('open');editOi=null;editSi=null}
+function bindStickerClicks(){
+  area.querySelectorAll('[data-oi]').forEach(el=>{
+    el.addEventListener('click',e=>{e.stopPropagation();openEditor(+el.dataset.oi,+el.dataset.si,el.getBoundingClientRect())});
+  });
+}
+document.getElementById('ep-close')?.addEventListener('click',closeEditor);
+epOverlay?.addEventListener('click',closeEditor);
+document.getElementById('ep-save')?.addEventListener('click',()=>{
+  if(editOi===null)return;
+  const s=DATA[editOi].stickers[editSi];
+  s.type=document.getElementById('ep-type').value;
+  s.value=document.getElementById('ep-value').value;
+  s.isWhite=document.getElementById('ep-color').value==='white';
+  if(s.type==='flag')s.flagCode=flagToCode(s.value);
+  closeEditor();renderSheets();toast('Sticker actualizado');
+});
+document.getElementById('ep-del')?.addEventListener('click',()=>{
+  if(editOi===null)return;
+  DATA[editOi].stickers.splice(editSi,1);
+  closeEditor();renderSidebar();renderSheets();toast('Sticker eliminado');
 });
 
 // Export
