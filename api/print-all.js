@@ -247,7 +247,7 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
   <div class="ep-row"><label>Color texto</label><select id="ep-color"><option value="black">Negro</option><option value="white">Blanco</option></select></div>
   <div class="ep-actions">
     <button class="ep-btn ep-save" id="ep-save">Guardar</button>
-    <button class="ep-btn ep-del" id="ep-del">Eliminar</button>
+<button class="ep-btn ep-del" id="ep-del">Eliminar</button><button class="ep-btn ep-save" id="ep-dup" style="background:#2563eb">Duplicar</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -382,6 +382,13 @@ document.getElementById('ep-save')?.addEventListener('click',()=>{
   s.isWhite=document.getElementById('ep-color').value==='white';
   if(s.type==='flag')s.flagCode=flagToCode(s.value);
   closeEditor();renderSheets();toast('Sticker actualizado');
+});
+document.getElementById('ep-dup')?.addEventListener('click',()=>{
+  if(editOi===null)return;
+  const s=DATA[editOi].stickers[editSi];
+  const copy={type:s.type,value:s.value,isWhite:s.isWhite,flagCode:s.flagCode};
+  DATA[editOi].stickers.splice(editSi+1,0,copy);
+  closeEditor();renderSidebar();renderSheets();toast('Sticker duplicado');
 });
 document.getElementById('ep-del')?.addEventListener('click',()=>{
   if(editOi===null)return;
