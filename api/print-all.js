@@ -143,8 +143,8 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .sidebar-sticker-count{font-size:11px;color:#d4d4d8;flex-shrink:0;font-weight:700;font-family:'Teko',sans-serif}
 .canvas-area{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
 .canvas-wrap{background:var(--preview-bg,repeating-conic-gradient(#e4e4e7 0% 25%,#fff 0% 50%) 50% / 14px 14px);padding:12px;border-radius:8px;border:1px solid #d4d4d8;display:inline-block;min-height:100px}
-#render-area{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,10px);align-items:flex-start;align-content:flex-start}
-.sheet{border:var(--sheet-border,1.5px) solid #18181b;border-radius:4px;padding:6px;display:inline-block}
+#render-area{columns:var(--render-cols,5);column-gap:var(--sheet-gap,10px)}
+.sheet{border:var(--sheet-border,1.5px) solid #18181b;border-radius:4px;padding:6px;display:inline-block;width:100%;margin-bottom:var(--sheet-gap,10px);break-inside:avoid}
 .stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px)}
 .s{border:var(--border-w,0px) solid var(--border-color,#18181b);border-radius:var(--border-r,2px);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:outline .1s}
 .s:hover{outline:2px solid #2563eb;outline-offset:1px}
@@ -154,6 +154,8 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .s-flag img{width:calc(100% - 8px);height:calc(100% - 8px);object-fit:contain;display:block;margin:auto}
 .s-icon{width:var(--flag-w,52px);height:var(--flag-h,36px);display:flex;align-items:center;justify-content:center;font-size:calc(var(--flag-h,36px)*0.55)}
 .s-custom{font-family:'Poppins',sans-serif;font-size:9px;padding:4px 8px;max-width:90px;text-align:center;color:#a1a1aa;font-style:italic}
+.s-img{width:var(--flag-w,52px);height:var(--flag-h,36px);padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.s-img img{width:calc(100% - 4px);height:calc(100% - 4px);object-fit:contain;display:block;margin:auto}
 .css-flag{width:calc(100% - 8px);height:calc(100% - 8px);position:relative;margin:auto;border-radius:1px;overflow:hidden}
 .eng{background:#fff}.eng-h{position:absolute;top:50%;left:0;right:0;height:22%;background:#CE1124;transform:translateY(-50%)}.eng-v{position:absolute;left:50%;top:0;bottom:0;width:18%;background:#CE1124;transform:translateX(-50%)}
 .sct{background:#005EB8;overflow:hidden}
@@ -245,6 +247,7 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
   <div class="ep-row"><label>Tipo</label><select id="ep-type"><option value="text">Texto</option><option value="number">Número</option><option value="flag">Bandera</option><option value="icon">Icono</option><option value="custom">Custom</option></select></div>
   <div class="ep-row"><label>Valor</label><input type="text" id="ep-value" placeholder="PEDRO"></div>
   <div class="ep-row"><label>Color texto</label><select id="ep-color"><option value="black">Negro</option><option value="white">Blanco</option></select></div>
+  <div class="ep-row"><label>Subir imagen</label><input type="file" id="ep-file" accept="image/*" style="font-size:11px"></div>
   <div class="ep-actions">
     <button class="ep-btn ep-save" id="ep-save">Guardar</button>
 <button class="ep-btn ep-del" id="ep-del">Eliminar</button><button class="ep-btn ep-save" id="ep-dup" style="background:#2563eb">Duplicar</button>
@@ -286,6 +289,7 @@ function flagHTML(code,tag){
   if(code==='gb-wls')return'<div class="s s-flag"'+tag+'><div class="css-flag wls"><div class="wls-t"></div><div class="wls-b"></div></div></div>';
   return'<div class="s s-flag"'+tag+'><img src="https://flagcdn.com/w320/'+code+'.png" crossorigin="anonymous" alt=""></div>';
 }
+if(s.type==='image'&&s.imgSrc)return'<div class="s s-img"'+tag+'><img src="'+s.imgSrc+'" alt=""></div>';
 function stickerHTML(s,oi,si){
   const tag=' data-oi="'+oi+'" data-si="'+si+'"';
   if(s.type==='flag')return flagHTML(s.flagCode,tag);
@@ -389,6 +393,16 @@ document.getElementById('ep-dup')?.addEventListener('click',()=>{
   const copy={type:s.type,value:s.value,isWhite:s.isWhite,flagCode:s.flagCode};
   DATA[editOi].stickers.splice(editSi+1,0,copy);
   closeEditor();renderSidebar();renderSheets();toast('Sticker duplicado');
+});
+document.getElementById('ep-file')?.addEventListener('change',(e)=>{
+  const file=e.target.files[0];if(!file||editOi===null)return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    const s=DATA[editOi].stickers[editSi];
+    s.type='image';s.value='';s.imgSrc=ev.target.result;
+    closeEditor();renderSheets();toast('Imagen añadida');
+  };
+  reader.readAsDataURL(file);
 });
 document.getElementById('ep-del')?.addEventListener('click',()=>{
   if(editOi===null)return;
