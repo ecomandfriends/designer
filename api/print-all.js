@@ -142,7 +142,7 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
 .sidebar-sticker-count{font-size:11px;color:#d4d4d8;flex-shrink:0;font-weight:700;font-family:'Teko',sans-serif}
 .canvas-area{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
 .canvas-wrap{background:var(--preview-bg,repeating-conic-gradient(#e4e4e7 0% 25%,#fff 0% 50%) 50% / 14px 14px);padding:12px;border-radius:8px;border:1px solid #d4d4d8;display:inline-block;min-height:100px}
-#render-area{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,10px);align-items:flex-start;align-content:flex-start}
+#render-area{display:flex;flex-wrap:wrap;gap:var(--sheet-gap,10px);align-items:flex-start;align-content:flex-start;max-width:1200px}
 .sheet{border:var(--sheet-border,1.5px) solid #18181b;border-radius:4px;padding:6px}
 .sheet-label{margin-bottom:4px;font-family:'Poppins',sans-serif;font-size:var(--label-size,12px);font-weight:400;color:#18181b}
 .stickers{display:grid;grid-template-columns:repeat(var(--cols,4),auto);gap:var(--sticker-gap,4px)}
@@ -202,7 +202,7 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
   <div class="ctrl"><label>Pad H</label><input type="range" id="c-padh" min="4" max="24" value="10"><span class="ctrl-val" id="v-padh">10</span></div>
   <div class="ctrl"><label>Pad V</label><input type="range" id="c-padv" min="2" max="16" value="5"><span class="ctrl-val" id="v-padv">5</span></div>
   <div class="ctrl"><label>Cols</label><input type="range" id="c-cols" min="2" max="8" value="4"><span class="ctrl-val" id="v-cols">4</span></div>
-  <div class="ctrl"><label>Print cols</label><input type="range" id="c-rcols" min="2" max="8" value="4"><span class="ctrl-val" id="v-rcols">4</span></div>
+  <div class="ctrl"><label>Ancho</label><input type="range" id="c-rwidth" min="400" max="2000" value="1200"><span class="ctrl-val" id="v-rwidth">1200</span></div>
   <div class="ctrl"><label>Label</label><input type="range" id="c-label" min="8" max="18" value="12"><span class="ctrl-val" id="v-label">12</span></div>
   <div class="ctrl"><label>Color</label><input type="color" id="c-bcolor" value="#18181b"></div>
   <div class="ctrl"><label>Bg</label><select id="c-bg"><option value="check">Transp.</option><option value="#fff">Blanco</option><option value="#4a90d9">Azul</option><option value="#18181b">Negro</option><option value="#e4e4e7">Gris</option></select></div>
@@ -242,7 +242,6 @@ body{font-family:'Poppins',sans-serif;background:#f4f4f5;color:#18181b;height:10
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
 <script>
 const DATA=${JSON.stringify(allOrdersData)};
 const SHOPS=${JSON.stringify(shopList)};
@@ -250,13 +249,9 @@ const TOKEN='${token}';
 const selected=new Set();
 let filter='all',shopFilter='all';
 DATA.forEach((o,i)=>{if(!o.printed)selected.add(i)});
-const area=document.getElementById('render-area');
-const wrap=document.getElementById('canvas-wrap');
-const list=document.getElementById('sidebar-list');
+const area=document.getElementById('render-area'),wrap=document.getElementById('canvas-wrap'),list=document.getElementById('sidebar-list');
 const PRINT_W_PX=Math.round(580*300/25.4);
-
 function toast(msg,ms){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show';setTimeout(()=>{t.className='toast'},ms||3000)}
-
 function flagToCode(val){
   if(!val)return null;
   const ris=[];for(const ch of val){const cp=ch.codePointAt(0);if(cp>=0x1F1E6&&cp<=0x1F1FF)ris.push(cp)}
@@ -269,7 +264,6 @@ function flagToCode(val){
   for(const[n,c]of Object.entries(map)){if(clean.includes(n)||n.includes(clean))return c}
   return null;
 }
-
 function flagHTML(code,tag){
   if(!code)return'<div class="s s-icon"'+tag+'>🏳️</div>';
   if(code==='gb-eng')return'<div class="s s-flag"'+tag+'><div class="css-flag eng"><div class="eng-h"></div><div class="eng-v"></div></div></div>';
@@ -277,7 +271,6 @@ function flagHTML(code,tag){
   if(code==='gb-wls')return'<div class="s s-flag"'+tag+'><div class="css-flag wls"><div class="wls-t"></div><div class="wls-b"></div></div></div>';
   return'<div class="s s-flag"'+tag+'><img src="https://flagcdn.com/w320/'+code+'.png" crossorigin="anonymous" alt=""></div>';
 }
-
 function stickerHTML(s,oi,si){
   const tag=' data-oi="'+oi+'" data-si="'+si+'"';
   if(s.type==='image'&&s.imgSrc)return'<div class="s s-img"'+tag+'><img src="'+s.imgSrc+'" alt=""></div>';
@@ -286,115 +279,50 @@ function stickerHTML(s,oi,si){
   if(s.type==='custom')return'<div class="s"'+tag+'><span class="s-custom">✨ '+(s.value.length>25?s.value.substring(0,25)+'…':s.value)+'</span></div>';
   return'<div class="s"'+tag+'><span class="s-txt '+(s.isWhite?'white':'black')+'">'+s.value+'</span></div>';
 }
-
-function visibleIndices(){
-  return DATA.map((_,i)=>i).filter(i=>{
-    const o=DATA[i];
-    if(shopFilter!=='all'&&o.shopId!==shopFilter)return false;
-    if(filter==='pending'&&o.printed)return false;
-    if(filter==='printed'&&!o.printed)return false;
-    return true;
-  });
-}
-
+function visibleIndices(){return DATA.map((_,i)=>i).filter(i=>{const o=DATA[i];if(shopFilter!=='all'&&o.shopId!==shopFilter)return false;if(filter==='pending'&&o.printed)return false;if(filter==='printed'&&!o.printed)return false;return true})}
 function renderSidebar(){
   const vis=visibleIndices();
-  list.innerHTML=vis.map(i=>{
-    const o=DATA[i],on=selected.has(i);
-    return'<div class="sidebar-item'+(o.printed?' is-printed':'')+'" data-i="'+i+'"><div class="sidebar-chk'+(on?' on':'')+'">'+(on?'✓':'')+'</div><div class="sidebar-order-info"><div class="sidebar-order-name">'+o.name+'</div><div class="sidebar-order-meta">'+(o.printed?'<span class="badge badge-printed">Impreso</span>':o.fulfillment==='fulfilled'?'<span class="badge badge-fulfilled">Enviado</span>':'<span class="badge badge-pending">Pendiente</span>')+(shopFilter==='all'&&SHOPS.length>1?'<span style="font-size:8px;color:'+o.shopColor+';font-weight:600">'+o.shopName.substring(0,12)+'</span>':'')+'</div></div><span class="sidebar-sticker-count">'+o.stickers.length+'</span></div>';
-  }).join('');
+  list.innerHTML=vis.map(i=>{const o=DATA[i],on=selected.has(i);return'<div class="sidebar-item'+(o.printed?' is-printed':'')+'" data-i="'+i+'"><div class="sidebar-chk'+(on?' on':'')+'">'+(on?'✓':'')+'</div><div class="sidebar-order-info"><div class="sidebar-order-name">'+o.name+'</div><div class="sidebar-order-meta">'+(o.printed?'<span class="badge badge-printed">Impreso</span>':o.fulfillment==='fulfilled'?'<span class="badge badge-fulfilled">Enviado</span>':'<span class="badge badge-pending">Pendiente</span>')+(shopFilter==='all'&&SHOPS.length>1?'<span style="font-size:8px;color:'+o.shopColor+';font-weight:600">'+o.shopName.substring(0,12)+'</span>':'')+'</div></div><span class="sidebar-sticker-count">'+o.stickers.length+'</span></div>'}).join('');
   list.querySelectorAll('.sidebar-item').forEach(el=>{el.addEventListener('click',()=>{const i=+el.dataset.i;selected.has(i)?selected.delete(i):selected.add(i);renderSidebar();renderSheets()})});
 }
-
 function renderSheets(){
   const sel=[...selected].sort().filter(i=>visibleIndices().includes(i));
   document.getElementById('sel-info').textContent=sel.length+' sel · '+sel.reduce((s,i)=>s+DATA[i].stickers.length,0)+' stickers';
-  if(!sel.length){area.innerHTML='<div class="empty-msg">Selecciona pedidos del panel izquierdo</div>';return}
+  if(!sel.length){area.innerHTML='<div class="empty-msg">Selecciona pedidos</div>';return}
   area.innerHTML=sel.map(i=>{const o=DATA[i];return'<div class="sheet"><div class="sheet-label">'+o.name+'</div><div class="stickers">'+o.stickers.map((s,j)=>stickerHTML(s,i,j)).join('')+'</div></div>'}).join('');
   bindStickerClicks();
 }
-
 document.querySelectorAll('.shop-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.shop-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');shopFilter=t.dataset.shopfilter;renderSidebar();renderSheets()})});
 document.querySelectorAll('.fbtn[data-filter]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.fbtn[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;renderSidebar();renderSheets()})});
-
-const ctrls=[{id:'c-font',css:'--font-size',u:'px',v:'v-font'},{id:'c-lh',css:'--line-h',u:'',v:'v-lh'},{id:'c-border',css:'--border-w',u:'px',v:'v-border'},{id:'c-radius',css:'--border-r',u:'px',v:'v-radius'},{id:'c-sborder',css:'--sheet-border',u:'px',v:'v-sborder'},{id:'c-flagw',css:'--flag-w',u:'px',v:'v-flagw'},{id:'c-flagh',css:'--flag-h',u:'px',v:'v-flagh'},{id:'c-gap',css:'--sticker-gap',u:'px',v:'v-gap'},{id:'c-sgap',css:'--sheet-gap',u:'px',v:'v-sgap'},{id:'c-padh',css:'--txt-pad-h',u:'px',v:'v-padh'},{id:'c-padv',css:'--txt-pad-v',u:'px',v:'v-padv'},{id:'c-cols',css:'--cols',u:'',v:'v-cols'},{id:'c-rcols',css:'--render-cols',u:'',v:'v-rcols'},{id:'c-label',css:'--label-size',u:'px',v:'v-label'}];
+const ctrls=[{id:'c-font',css:'--font-size',u:'px',v:'v-font'},{id:'c-lh',css:'--line-h',u:'',v:'v-lh'},{id:'c-border',css:'--border-w',u:'px',v:'v-border'},{id:'c-radius',css:'--border-r',u:'px',v:'v-radius'},{id:'c-sborder',css:'--sheet-border',u:'px',v:'v-sborder'},{id:'c-flagw',css:'--flag-w',u:'px',v:'v-flagw'},{id:'c-flagh',css:'--flag-h',u:'px',v:'v-flagh'},{id:'c-gap',css:'--sticker-gap',u:'px',v:'v-gap'},{id:'c-sgap',css:'--sheet-gap',u:'px',v:'v-sgap'},{id:'c-padh',css:'--txt-pad-h',u:'px',v:'v-padh'},{id:'c-padv',css:'--txt-pad-v',u:'px',v:'v-padv'},{id:'c-cols',css:'--cols',u:'',v:'v-cols'},{id:'c-rwidth',css:'max-width',u:'px',v:'v-rwidth'},{id:'c-label',css:'--label-size',u:'px',v:'v-label'}];
 ctrls.forEach(c=>{const el=document.getElementById(c.id);if(!el)return;el.addEventListener('input',()=>{area.style.setProperty(c.css,el.value+c.u);document.getElementById(c.v).textContent=el.value})});
 document.getElementById('c-bcolor')?.addEventListener('input',e=>{area.style.setProperty('--border-color',e.target.value)});
 document.getElementById('c-bg')?.addEventListener('change',e=>{wrap.style.background=e.target.value==='check'?'repeating-conic-gradient(#e4e4e7 0% 25%,#fff 0% 50%) 50% / 14px 14px':e.target.value});
 document.getElementById('togglePanel')?.addEventListener('click',()=>{document.getElementById('panel').classList.toggle('open')});
 document.getElementById('selAll')?.addEventListener('click',()=>{visibleIndices().forEach(i=>selected.add(i));renderSidebar();renderSheets()});
 document.getElementById('selNone')?.addEventListener('click',()=>{selected.clear();renderSidebar();renderSheets()});
-
 document.getElementById('tagBtn')?.addEventListener('click',async()=>{
-  const sel=[...selected].filter(i=>!DATA[i].printed);
-  if(!sel.length){toast('No hay pedidos nuevos');return}
+  const sel=[...selected].filter(i=>!DATA[i].printed);if(!sel.length){toast('No hay pedidos nuevos');return}
   const btn=document.getElementById('tagBtn');btn.textContent='Marcando...';btn.disabled=true;
   const byShop={};sel.forEach(i=>{const o=DATA[i];if(!byShop[o.shopId])byShop[o.shopId]=[];byShop[o.shopId].push(o.id)});
   let ok=0,fail=0;
-  for(const[sid,ids]of Object.entries(byShop)){
-    try{const r=await fetch('/api/tag-orders?token='+TOKEN,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':TOKEN},body:JSON.stringify({orderIds:ids,shopId:sid,tag:'printed'})});
-    if(r.ok){const d=await r.json();ok+=d.results.success.length;fail+=d.results.failed.length;d.results.success.forEach(id=>{const idx=DATA.findIndex(o=>o.id===id);if(idx>=0)DATA[idx].printed=true})}
-    else fail+=ids.length}catch{fail+=ids.length}
-  }
-  toast('✓ '+ok+' marcados'+(fail?' ('+fail+' fallaron)':''));
-  btn.textContent='🏷 Marcar impresos';btn.disabled=false;
-  renderSidebar();renderSheets();
+  for(const[sid,ids]of Object.entries(byShop)){try{const r=await fetch('/api/tag-orders?token='+TOKEN,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':TOKEN},body:JSON.stringify({orderIds:ids,shopId:sid,tag:'printed'})});if(r.ok){const d=await r.json();ok+=d.results.success.length;fail+=d.results.failed.length;d.results.success.forEach(id=>{const idx=DATA.findIndex(o=>o.id===id);if(idx>=0)DATA[idx].printed=true})}else fail+=ids.length}catch{fail+=ids.length}}
+  toast('✓ '+ok+' marcados'+(fail?' ('+fail+' fallaron)':''));btn.textContent='🏷 Marcar impresos';btn.disabled=false;renderSidebar();renderSheets();
 });
-
 let editOi=null,editSi=null;
-const popup=document.getElementById('editor-popup');
-const epOv=document.getElementById('ep-overlay');
-function openEditor(oi,si,rect){
-  editOi=oi;editSi=si;const s=DATA[oi].stickers[si];
-  document.getElementById('ep-type').value=s.type==='image'?'custom':s.type;
-  document.getElementById('ep-value').value=s.value;
-  document.getElementById('ep-color').value=s.isWhite?'white':'black';
-  document.getElementById('ep-file').value='';
-  popup.style.top=Math.min(rect.bottom+8,window.innerHeight-320)+'px';
-  popup.style.left=Math.min(rect.left,window.innerWidth-270)+'px';
-  popup.classList.add('open');epOv.classList.add('open');
-}
+const popup=document.getElementById('editor-popup'),epOv=document.getElementById('ep-overlay');
+function openEditor(oi,si,rect){editOi=oi;editSi=si;const s=DATA[oi].stickers[si];document.getElementById('ep-type').value=s.type==='image'?'custom':s.type;document.getElementById('ep-value').value=s.value;document.getElementById('ep-color').value=s.isWhite?'white':'black';document.getElementById('ep-file').value='';popup.style.top=Math.min(rect.bottom+8,window.innerHeight-320)+'px';popup.style.left=Math.min(rect.left,window.innerWidth-270)+'px';popup.classList.add('open');epOv.classList.add('open')}
 function closeEditor(){popup.classList.remove('open');epOv.classList.remove('open');editOi=null;editSi=null}
 function bindStickerClicks(){area.querySelectorAll('[data-oi]').forEach(el=>{el.addEventListener('click',e=>{e.stopPropagation();openEditor(+el.dataset.oi,+el.dataset.si,el.getBoundingClientRect())})})}
-
 document.getElementById('ep-close')?.addEventListener('click',closeEditor);
 epOv?.addEventListener('click',closeEditor);
-document.getElementById('ep-save')?.addEventListener('click',()=>{
-  if(editOi===null)return;const s=DATA[editOi].stickers[editSi];
-  s.type=document.getElementById('ep-type').value;s.value=document.getElementById('ep-value').value;
-  s.isWhite=document.getElementById('ep-color').value==='white';
-  if(s.type==='flag')s.flagCode=flagToCode(s.value);
-  delete s.imgSrc;closeEditor();renderSheets();toast('Guardado');
-});
-document.getElementById('ep-dup')?.addEventListener('click',()=>{
-  if(editOi===null)return;const s=DATA[editOi].stickers[editSi];
-  const copy={type:s.type,value:s.value,isWhite:s.isWhite,flagCode:s.flagCode,imgSrc:s.imgSrc};
-  DATA[editOi].stickers.splice(editSi+1,0,copy);
-  closeEditor();renderSidebar();renderSheets();toast('Duplicado');
-});
-document.getElementById('ep-file')?.addEventListener('change',e=>{
-  const file=e.target.files[0];if(!file||editOi===null)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{const s=DATA[editOi].stickers[editSi];s.type='image';s.value='';s.imgSrc=ev.target.result;closeEditor();renderSheets();toast('Imagen añadida')};
-  reader.readAsDataURL(file);
-});
-document.getElementById('ep-del')?.addEventListener('click',()=>{
-  if(editOi===null)return;DATA[editOi].stickers.splice(editSi,1);
-  closeEditor();renderSidebar();renderSheets();toast('Eliminado');
-});
-
+document.getElementById('ep-save')?.addEventListener('click',()=>{if(editOi===null)return;const s=DATA[editOi].stickers[editSi];s.type=document.getElementById('ep-type').value;s.value=document.getElementById('ep-value').value;s.isWhite=document.getElementById('ep-color').value==='white';if(s.type==='flag')s.flagCode=flagToCode(s.value);delete s.imgSrc;closeEditor();renderSheets();toast('Guardado')});
+document.getElementById('ep-dup')?.addEventListener('click',()=>{if(editOi===null)return;const s=DATA[editOi].stickers[editSi];DATA[editOi].stickers.splice(editSi+1,0,{type:s.type,value:s.value,isWhite:s.isWhite,flagCode:s.flagCode,imgSrc:s.imgSrc});closeEditor();renderSidebar();renderSheets();toast('Duplicado')});
+document.getElementById('ep-file')?.addEventListener('change',e=>{const file=e.target.files[0];if(!file||editOi===null)return;const reader=new FileReader();reader.onload=ev=>{const s=DATA[editOi].stickers[editSi];s.type='image';s.value='';s.imgSrc=ev.target.result;closeEditor();renderSheets();toast('Imagen añadida')};reader.readAsDataURL(file)});
+document.getElementById('ep-del')?.addEventListener('click',()=>{if(editOi===null)return;DATA[editOi].stickers.splice(editSi,1);closeEditor();renderSidebar();renderSheets();toast('Eliminado')});
 function waitImages(){return Promise.all([...area.querySelectorAll('img')].map(img=>{if(img.complete&&img.naturalWidth>0)return Promise.resolve();return new Promise(r=>{img.onload=r;img.onerror=()=>{img.style.display='none';r()}})}))}
-document.getElementById('dlPng')?.addEventListener('click',async()=>{
-  const btn=document.getElementById('dlPng');btn.textContent='...';btn.disabled=true;
-  try{await waitImages();const m=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');const scale=Math.ceil(PRINT_W_PX/area.scrollWidth);const canvas=await m.default(area,{backgroundColor:null,scale,useCORS:true,allowTaint:false,logging:false,imageTimeout:30000});const final=document.createElement('canvas');final.width=PRINT_W_PX;final.height=Math.round(canvas.height*(PRINT_W_PX/canvas.width));const ctx=final.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(canvas,0,0,final.width,final.height);const a=document.createElement('a');a.download='stickers_58cm.png';a.href=final.toDataURL('image/png');a.click()}catch(e){console.error(e);alert('Error: '+e.message)}
-  btn.textContent='⬇ PNG';btn.disabled=false;
-});
-document.getElementById('dlSvg')?.addEventListener('click',()=>{
-  const css=[...document.styleSheets].map(s=>{try{return[...s.cssRules].map(r=>r.cssText).join('')}catch{return''}}).join('');
-  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+area.scrollWidth+'" height="'+area.scrollHeight+'"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>'+css+'</style>'+area.outerHTML+'</div></foreignObject></svg>';
-  const a=document.createElement('a');a.download='stickers.svg';a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.click();
-});
-
+document.getElementById('dlPng')?.addEventListener('click',async()=>{const btn=document.getElementById('dlPng');btn.textContent='...';btn.disabled=true;try{await waitImages();const m=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');const scale=Math.min(Math.ceil(PRINT_W_PX/area.scrollWidth),6);const canvas=await m.default(area,{backgroundColor:null,scale,useCORS:true,allowTaint:false,logging:false,imageTimeout:30000});const final=document.createElement('canvas');final.width=PRINT_W_PX;final.height=Math.round(canvas.height*(PRINT_W_PX/canvas.width));const ctx=final.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(canvas,0,0,final.width,final.height);const a=document.createElement('a');a.download='stickers_58cm.png';a.href=final.toDataURL('image/png');a.click()}catch(e){console.error(e);alert('Error: '+e.message)}btn.textContent='⬇ PNG';btn.disabled=false});
+document.getElementById('dlSvg')?.addEventListener('click',()=>{const css=[...document.styleSheets].map(s=>{try{return[...s.cssRules].map(r=>r.cssText).join('')}catch{return''}}).join('');const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+area.scrollWidth+'" height="'+area.scrollHeight+'"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>'+css+'</style>'+area.outerHTML+'</div></foreignObject></svg>';const a=document.createElement('a');a.download='stickers.svg';a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.click()});
 renderSidebar();renderSheets();
 </script>
 </body></html>`);
