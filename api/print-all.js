@@ -46,14 +46,14 @@ module.exports = async (req, res) => {
       shopOrders.forEach(order => {
         const stickers = (order.line_items || []).map(li => {
           const ps = li.properties || [];
-          const isSticker = ps.some(p => p.name === '_sticker' && p.value === 'true');
-          const isPack = ps.some(p => p.name === '_wc_pack' && p.value === 'true');
+         const isSticker = ps.some(p => p.name === '_sticker' && /^true$/i.test(String(p.value)));
+const isPack = ps.some(p => /^_wc_pack$/i.test(p.name) && /^true$/i.test(String(p.value)));
           if (!isSticker && !isPack) return [];
           const colorProp = getProp(ps, 'Color', 'Colour');
           const isWhite = /blanco|white/i.test(colorProp);
           const items = [];
           if (isPack) {
-            ps.filter(p => /^Sticker \d+$/i.test(p.name)).forEach(sp => {
+           ps.filter(p => /^Sticker\s*\d+$/i.test(p.name.trim())).forEach(sp => {
               const m = sp.value.match(/^(\w+):\s*(.+?)(?:\s*[×x](\d+))?$/i);
               if (!m) return;
               const [, tipo, rawVal, qty] = m;
