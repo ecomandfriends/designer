@@ -54,15 +54,18 @@ module.exports = async (req, res) => {
           const items = [];
           if (isPack) {
             ps.filter(p => /^Sticker \d+$/i.test(p.name)).forEach(sp => {
-              const m = sp.value.match(/^(\w+):\s*(.+?)\s*[×x](\d+)$/i);
+              const m = sp.value.match(/^(\w+):\s*(.+?)(?:\s*[×x](\d+))?$/i);
               if (!m) return;
-              const [, tipo, val, qty] = m;
+              const [, tipo, rawVal, qty] = m;
+              const colorMatch = rawVal.match(/^(.+?)\s*\((black|white|negro|blanco)\)\s*$/i);
+              const val = colorMatch ? colorMatch[1].trim() : rawVal.trim();
+              const stickerWhite = colorMatch ? /white|blanco/i.test(colorMatch[2]) : isWhite;
               let type = 'text';
               if (/flag/i.test(tipo)) type = 'flag';
               else if (/number/i.test(tipo)) type = 'number';
               else if (/icon/i.test(tipo)) type = 'icon';
-              const fc = type === 'flag' ? flagToCode(val.trim()) : null;
-              for (let i = 0; i < (parseInt(qty) || 1); i++) items.push({ type, value: val.trim(), isWhite, flagCode: fc });
+              const fc = type === 'flag' ? flagToCode(val) : null;
+              for (let i = 0; i < (parseInt(qty) || 1); i++) items.push({ type, value: val, isWhite: stickerWhite, flagCode: fc });
             });
           } else {
             const tipo = getProp(ps, 'Tipo', 'Type');
@@ -321,7 +324,17 @@ document.getElementById('ep-dup')?.addEventListener('click',()=>{if(editOi===nul
 document.getElementById('ep-file')?.addEventListener('change',e=>{const file=e.target.files[0];if(!file||editOi===null)return;const reader=new FileReader();reader.onload=ev=>{const s=DATA[editOi].stickers[editSi];s.type='image';s.value='';s.imgSrc=ev.target.result;closeEditor();renderSheets();toast('Imagen añadida')};reader.readAsDataURL(file)});
 document.getElementById('ep-del')?.addEventListener('click',()=>{if(editOi===null)return;DATA[editOi].stickers.splice(editSi,1);closeEditor();renderSidebar();renderSheets();toast('Eliminado')});
 function waitImages(){return Promise.all([...area.querySelectorAll('img')].map(img=>{if(img.complete&&img.naturalWidth>0)return Promise.resolve();return new Promise(r=>{img.onload=r;img.onerror=()=>{img.style.display='none';r()}})}))}
-document.getElementById('dlPng')?.addEventListener('click',async()=>{const btn=document.getElementById('dlPng');btn.textContent='...';btn.disabled=true;try{await waitImages();const m=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');const scale=Math.min(Math.ceil(PRINT_W_PX/area.scrollWidth),6);const canvas=await m.default(area,{backgroundColor:null,scale,useCORS:true,allowTaint:false,logging:false,imageTimeout:30000});const final=document.createElement('canvas');final.width=PRINT_W_PX;final.height=Math.round(canvas.height*(PRINT_W_PX/canvas.width));const ctx=final.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(canvas,0,0,final.width,final.height);const a=document.createElement('a');a.download='stickers_58cm.png';a.href=final.toDataURL('image/png');a.click()}catch(e){console.error(e);alert('Error: '+e.message)}btn.textContent='⬇ PNG';btn.disabled=false});
+document.getElementById('dlPng')?.addEventListener('click',async()=>{
+  const btn=document.getElementById('dlPng');btn.textContent='...';btn.disabled=true;
+  try{
+    await waitImages();
+    const m=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');
+    const canvas=await m.default(area,{backgroundColor:null,scale:3,useCORS:true,allowTaint:false,logging:false,imageTimeout:30000});
+    if(canvas.width<10||canvas.height<10){alert('Canvas vacío');btn.textContent='⬇ PNG';btn.disabled=false;return}
+    const a=document.createElement('a');a.download='stickers.png';a.href=canvas.toDataURL('image/png');a.click();
+  }catch(e){console.error(e);alert('Error: '+e.message)}
+  btn.textContent='⬇ PNG';btn.disabled=false;
+});
 document.getElementById('dlSvg')?.addEventListener('click',()=>{const css=[...document.styleSheets].map(s=>{try{return[...s.cssRules].map(r=>r.cssText).join('')}catch{return''}}).join('');const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+area.scrollWidth+'" height="'+area.scrollHeight+'"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>'+css+'</style>'+area.outerHTML+'</div></foreignObject></svg>';const a=document.createElement('a');a.download='stickers.svg';a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.click()});
 renderSidebar();renderSheets();
 </script>
